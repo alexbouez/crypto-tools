@@ -1,0 +1,13 @@
+[package]
+name = "CryptoTools"
+version = "0.1.0"
+edition = "2021"
+default-run="main"
+
+[[bin]]
+name = "main"
+path = "src/main.rs"
+
+[dependencies]
+num = "0.4"
+rand = "0.8"
