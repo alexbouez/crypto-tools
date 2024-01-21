@@ -11,8 +11,8 @@ use std::io::Error;
 use std::time::Instant;
 use rand::{Rng, thread_rng};
 
-use CryptoTools::prng::PRNG;
-use CryptoTools::prng::gt2016::SPRG;
+use CryptoTools::prng::{PRNG, gt2016::SPRG};
+use CryptoTools::utilities::bitops::rotate_U;
 
 /// Main function. 
 fn main() -> Result<(), Error>{
@@ -21,10 +21,7 @@ fn main() -> Result<(), Error>{
 
     println!("SPRNG Demonstration\n");
     // Define permutation
-    fn rotate_64(value: u64, shift: usize) -> u64 {
-        (value << shift.into()) | (value >> (64 - shift).into())
-    }
-    let rot_17: fn(u64) -> u64 = move |value| rotate_64(value, 17);
+    let rot_17: fn(u64) -> u64 = move |value| rotate_U::<u64>(value, 17, 64);
 
     // Setup
     let mut sprg = SPRG::setup(vec!(64, 4, 2, 16), rot_17)?;
