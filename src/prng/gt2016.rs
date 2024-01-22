@@ -6,7 +6,7 @@
 
 use std::io::Error;
 use rand::{Rng, thread_rng, distributions::Standard, prelude::Distribution};
-use std::{ops::{BitXor, BitAnd, Not}, convert::From};
+use std::{ops::{BitXor, BitAnd, Not, Sub, Shl}, convert::From};
 use crate::prng::PRNG;
 
 #[derive(Clone, Debug)]
@@ -44,13 +44,13 @@ impl<U> SPRG<U>
 }
 
 impl<U> PRNG<U, Vec<U>, U> for SPRG<U>
-    where U: From<u8> + Not<Output = U> + BitAnd<Output = U> + BitXor<Output = U> + Copy, 
-        Standard: Distribution<U>
+    where U: From<u8> + Not<Output = U> + BitAnd<Output = U> + BitXor<Output = U> + 
+        Shl<Output = U> + Sub<Output = U> + Copy, Standard: Distribution<U>
 {
     /// General setup function.
     fn setup(params: Vec<usize>, func: fn(U) -> U) -> Result<Self, Error> {
         let (n, r, t, s) = (params[0], params[1], params[2], params[3]);
-        assert!(r <= n);    // 0 < r <= n
+        assert!(r <= n);    // 0 < r <= n   
         
         // Generate the seed using rand
         let mask = ((1 << r) - 1).into();

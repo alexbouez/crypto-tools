@@ -4,18 +4,14 @@
 //!
 //! Module implementing bitwise operations.
 
-// use std::io::Error;
-use std::{ops::{BitOr, Shl, Shr, Sub}, convert::From};
+use std::mem::size_of;
+use std::ops::{BitOr, Shl, Shr, Sub};
 
-
-// Unsigned integer rotation function
-// Example of use: 
-// ```
-//      let rot_17: fn(u64) -> u64 = move |value| rotate_64(value, 17, 64);
-// ```
-pub fn rotate_U<U>(value: U, shift: U, size: U) -> U 
-    where U: Copy + BitOr<Output = U> + Shl<Output = U> +
-        Shr<Output = U> + Sub<Output = U>
+/// Unsigned integer rotation function
+pub fn urot<U>(value: U, shift: usize) -> U 
+    where U: Copy + BitOr<Output = U> + Shl<usize, Output = U> +
+        Shr<usize, Output = U> + Sub<Output = U> + Sized
 {
+    let size: usize = size_of::<U>()*8;
     (value << shift) | (value >> (size - shift))
 }

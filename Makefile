@@ -20,5 +20,5 @@ distclean: clean
 
 sprng64: 
 	@ cargo run --bin demo_sprng64
-sprng512: 
-	@ cargo run --bin demo_sprng512
+sprng256: 
+	@ cargo run --bin demo_sprng256
