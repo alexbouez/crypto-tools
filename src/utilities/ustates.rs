@@ -7,7 +7,7 @@
 use std::convert::From;
 use std::num::Wrapping;
 use std::cmp::{PartialOrd, PartialEq};
-use std::ops::{BitXor, BitAnd, Not, Shl, Sub, Add};
+use std::ops::{BitXor, BitAnd, Not, Shl, Shr, Sub, Add};
 use rand::{Rng, thread_rng, distributions::Standard, prelude::Distribution};
 
 #[derive(Clone, Debug)]
@@ -92,13 +92,25 @@ impl<U> BitXor for Ux4<U>
 }
 
 impl<U> Shl<usize> for Ux4<U> 
-    where U: From<u8> + Copy + Shl<usize, Output = U>
+    where U: From<u8> + Copy + Shl<usize, Output = U> + Shr<usize, Output = U> + 
+        PartialEq + PartialOrd + Add<Output = U>
 {
-    // TODO
     type Output = Self;
-    fn shl(self, rhs: usize) -> Self::Output {
-        let shifted = self.0.map(|x| x << rhs);
-        Ux4(shifted)
+    fn shl(self, shift: usize) -> Self::Output {
+        let mut result = self;
+        let bits_per_unit = std::mem::size_of::<U>() * 8;
+
+        for _ in 0..shift {
+            let mut carry: U = 0_u8.into();  
+            for i in 0..4 {
+                // Shift current element and add carry
+                let new_carry = result.0[i] >> (bits_per_unit - 1);
+                result.0[i] = (result.0[i] << 1) + carry;
+                carry = new_carry;
+            }
+        }
+
+        result
     }
 }
 
@@ -165,6 +177,43 @@ pub mod test {
         let c = Ux4::<u8>([0,1,0,0].into());
         assert!(a + b == c);
     }
+
+    #[test]
+    fn shl() {
+        let a = Ux4::<u8>([1,1,1,1].into());
+        let b = Ux4::<u8>([2,2,2,2].into());
+
+        let c = Ux4::<u8>([127,127,127,127].into());
+        let d = Ux4::<u8>([254,254,254,254].into());
+
+        let e = Ux4::<u8>([1,2,4,8].into());
+        let f = Ux4::<u8>([16,32,64,128].into());
+
+        assert!((a<<1) == b);
+        assert!((c<<1) == d);
+        assert!((e<<4) == f);
+    }
+    
+    #[test]
+    fn shl_carry() {
+        let a = Ux4::<u8>([255,0,0,0].into());
+        let b = Ux4::<u8>([254,1,0,0].into());
+
+        let c = Ux4::<u8>([128,128,128,0].into());
+        let d = Ux4::<u8>([0,1,1,1].into());
+
+        let e = Ux4::<u8>([255,255,255,255].into());
+        let f = Ux4::<u8>([254,255,255,255].into());
+        
+        let g = Ux4::<u8>([255,255,255,255].into());
+        let h = Ux4::<u8>([0,255,255,255].into());
+
+        assert!((a<<1) == b);
+        assert!((c<<1) == d);
+        assert!((e<<1) == f);
+        assert!((g<<8) == h);
+    }
+
 
     // #[test]
     // #[should_panic]
