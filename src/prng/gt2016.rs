@@ -6,7 +6,7 @@
 
 use std::io::Error;
 use rand::{Rng, thread_rng, distributions::Standard, prelude::Distribution};
-use std::{ops::{BitXor, BitAnd, Not, Sub, Shl}, convert::From};
+use std::{ops::{BitXor, BitAnd, BitOr, Not, Sub, Shl}, convert::From};
 use crate::prng::PRNG;
 
 #[derive(Clone, Debug)]
@@ -45,7 +45,8 @@ impl<U> SPRG<U>
 
 impl<U> PRNG<U, Vec<U>, U> for SPRG<U>
     where U: From<u8> + Not<Output = U> + BitAnd<Output = U> + BitXor<Output = U> + 
-        Shl<Output = U> + Sub<Output = U> + Copy, Standard: Distribution<U>
+        BitOr<Output = U> + Shl<Output = U> + Sub<Output = U> + Copy, 
+        Standard: Distribution<U>
 {
     /// General setup function.
     fn setup(params: Vec<usize>, func: fn(U) -> U) -> Result<Self, Error> {
@@ -53,12 +54,16 @@ impl<U> PRNG<U, Vec<U>, U> for SPRG<U>
         assert!(r <= n);    // 0 < r <= n   
         
         // Generate the seed using rand
-        let mask = ((1 << r) - 1).into();
+        let mask: U = ((1 << r) - 1).into();
         let mut rng = thread_rng();
         let mut seed: Vec<U> = Vec::with_capacity(s);
         for _ in 0..s {
             seed.push(rng.gen::<U>() & mask);
         }
+
+        // Initial state is r '0' bits and c random bits (n=c+r)
+        let mut state: U = 0_u8.into();
+        state = state | (rng.gen::<U>() & !mask);
 
         Ok(SPRG{
             n: n,
@@ -69,7 +74,7 @@ impl<U> PRNG<U, Vec<U>, U> for SPRG<U>
             mask: mask,
             perm: func,
             seed: seed,
-            state: 0_u8.into()
+            state: state
         })  
     }
 
@@ -92,7 +97,7 @@ impl<U> PRNG<U, Vec<U>, U> for SPRG<U>
             self.state = (self.perm)(self.state);
             self.state = self.state & !(self.mask);
         }
-        self.j = 1;
+        self.j = 1_u8.into();
         R
     }
 }
