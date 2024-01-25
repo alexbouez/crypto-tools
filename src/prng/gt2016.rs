@@ -45,16 +45,19 @@ impl<U> SPRG<U>
 
 impl<U> PRNG<U, Vec<U>, U> for SPRG<U>
     where U: From<u8> + Not<Output = U> + BitAnd<Output = U> + BitXor<Output = U> + 
-        BitOr<Output = U> + Shl<Output = U> + Sub<Output = U> + Copy, 
-        Standard: Distribution<U>
+        BitOr<Output = U> + Shl<usize, Output = U> + Sub<Output = U> + Copy + std::fmt::UpperHex, 
+        Standard: Distribution<U> 
 {
     /// General setup function.
     fn setup(params: Vec<usize>, func: fn(U) -> U) -> Result<Self, Error> {
         let (n, r, t, s) = (params[0], params[1], params[2], params[3]);
         assert!(r <= n);    // 0 < r <= n   
         
+        // Generate the mask
+        let mut mask: U = 1_u8.into();
+        mask = (mask << r) - 1_u8.into();
+
         // Generate the seed using rand
-        let mask: U = ((1 << r) - 1).into();
         let mut rng = thread_rng();
         let mut seed: Vec<U> = Vec::with_capacity(s);
         for _ in 0..s {
@@ -64,6 +67,7 @@ impl<U> PRNG<U, Vec<U>, U> for SPRG<U>
         // Initial state is r '0' bits and c random bits (n=c+r)
         let mut state: U = 0_u8.into();
         state = state | (rng.gen::<U>() & !mask);
+        // println!("Init state: {:X}", state);
 
         Ok(SPRG{
             n: n,
@@ -87,6 +91,7 @@ impl<U> PRNG<U, Vec<U>, U> for SPRG<U>
             );
             self.j = (self.j + 1) % self.s;
         }
+        // println!("Refreshed state: {:X}", self.state)
     }
     
     /// General next function.

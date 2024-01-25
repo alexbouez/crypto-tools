@@ -25,6 +25,7 @@ fn main() -> Result<(), Error>{
 
     // Define parameters 
     let (n, r, t, s) = (64, 4, 1, 3);
+    let nb_inputs: usize = 8;
 
     // Setup
     let mut sprg = SPRG::setup(vec!(n, r, t, s), rot_17)?;
@@ -33,8 +34,8 @@ fn main() -> Result<(), Error>{
         // Generate refresh inputs
         let mask = sprg.get_mask();
         let mut rng = thread_rng();
-        let mut inputs: Vec<u64> = Vec::with_capacity(6_usize);
-        for _ in 0..8 {
+        let mut inputs: Vec<u64> = Vec::with_capacity(nb_inputs);
+        for _ in 0..nb_inputs {
             inputs.push(rng.gen::<u64>() & mask);
         }
 
@@ -48,9 +49,9 @@ fn main() -> Result<(), Error>{
             R = sprg.next();
             print!("{:X}", R);
         }
-        print!("\n");
+        println!("\n");
     }
 
-    println!("\n-> Total execution time: {:.2?}", execution_start.elapsed());
+    println!("-> Total execution time: {:.2?}", execution_start.elapsed());
     Ok(())
 }

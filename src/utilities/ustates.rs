@@ -4,15 +4,16 @@
 //!
 //! Module implementing multi-register states.
 
+use std::fmt;
 use std::convert::From;
 use std::num::Wrapping;
 use std::cmp::{PartialOrd, PartialEq};
-use std::ops::{BitXor, BitAnd, Not, Shl, Shr, Sub, Add};
+use std::ops::{BitXor, BitOr, BitAnd, Not, Shl, Shr, Sub, Add};
 use rand::{Rng, thread_rng, distributions::Standard, prelude::Distribution};
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Copy)]
 /// Structure for four-register states.
-pub struct Ux4<U>([U; 4]);
+pub struct Ux4<U>(pub [U; 4]);
 
 impl<U> Ux4<U> 
     where U: From<u8> + Copy
@@ -28,6 +29,7 @@ impl<U> Ux4<U>
     }
 }
 
+/// [DEPRECATED]
 impl<U> Ux4<U> 
     where Standard: Distribution<U>
 {
@@ -52,6 +54,8 @@ impl<U> Ux4<U>
     }
 }
 
+// General Unsigned traits.
+
 impl<U> From<u8> for Ux4<U> 
     where U: From<u8> + Copy
 {
@@ -61,6 +65,19 @@ impl<U> From<u8> for Ux4<U>
         state
     }
 }
+
+impl Distribution<Ux4<u64>> for Standard {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Ux4<u64> {
+        Ux4([
+            rng.gen::<u64>(),
+            rng.gen::<u64>(),
+            rng.gen::<u64>(),
+            rng.gen::<u64>(),
+        ])
+    }
+}
+
+// Unsigned operations.
 
 impl<U> Not for Ux4<U> 
     where U: Not<Output = U> + Copy
@@ -91,21 +108,35 @@ impl<U> BitXor for Ux4<U>
     }
 }
 
+impl<U> BitOr for Ux4<U>
+    where U: BitOr<Output = U> + Copy
+{
+    type Output = Self;
+    fn bitor(self, rhs: Self) -> Self::Output {
+        Ux4([self.0[0] | rhs.0[0], self.0[1] | rhs.0[1], 
+            self.0[2] | rhs.0[2], self.0[3] | rhs.0[3]])
+    }
+}
+
 impl<U> Shl<usize> for Ux4<U> 
     where U: From<u8> + Copy + Shl<usize, Output = U> + Shr<usize, Output = U> + 
-        PartialEq + PartialOrd + Add<Output = U>
+        PartialEq + PartialOrd + Add<Output = U> + BitAnd<Output = U> 
 {
     type Output = Self;
     fn shl(self, shift: usize) -> Self::Output {
         let mut result = self;
         let bits_per_unit = std::mem::size_of::<U>() * 8;
+        
+        // let mut mask: U = 1_u8.into();
+        // mask = mask << (bits_per_unit - 2);
 
         for _ in 0..shift {
             let mut carry: U = 0_u8.into();  
             for i in 0..4 {
                 // Shift current element and add carry
                 let new_carry = result.0[i] >> (bits_per_unit - 1);
-                result.0[i] = (result.0[i] << 1) + carry;
+                // result.0[i] = ((result.0[i] & mask) << 1) + carry;
+                result.0[i] = ((result.0[i]) << 1) + carry;
                 carry = new_carry;
             }
         }
@@ -155,6 +186,59 @@ impl<U> PartialEq for Ux4<U>
 {
     fn eq(&self, other: &Self) -> bool {
         self.0.iter().zip(other.0.iter()).all(|(a, b)| a == b)
+    }
+}
+
+// Print formats.
+
+impl<U> fmt::Display for Ux4<U> 
+where
+    U: fmt::Display + Copy
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        for &item in &self.0 {
+            write!(f, "{} ", item)?;
+        }
+        Ok(())
+    }
+}
+
+impl<U> fmt::LowerHex for Ux4<U> 
+where
+    U: fmt::LowerHex + Copy
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        for i in 0..4 {
+            write!(f, "{:x}", self.0[i])?;
+            if i < 3 {write!(f, " ")?;}
+        }
+        Ok(())
+    }
+}
+
+impl<U> fmt::UpperHex for Ux4<U> 
+where
+    U: fmt::UpperHex + Copy
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        for i in 0..4 {
+            write!(f, "{:X}", self.0[i])?;
+            if i < 3 {write!(f, " ")?;}
+        }
+        Ok(())
+    }
+}
+
+impl<U> fmt::Binary for Ux4<U> 
+where
+    U: fmt::Binary + Copy
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        for i in 0..4 {
+            write!(f, "{:b}", self.0[i])?;
+            if i < 3 {write!(f, " ")?;}
+        }
+        Ok(())
     }
 }
 
@@ -214,10 +298,49 @@ pub mod test {
         assert!((g<<8) == h);
     }
 
+    #[test]
+    fn print_int() {
+        let [a,b,c,d] = [0xABCD0123, 0xBCDE1234, 0xCDEF2345, 0xDEF83456];
+        let test_string = format!("{} {} {} {}", a, b, c, d);
+
+        let ux4_instance = Ux4::<u64>([a, b, c, d]);
+        let formatted_string = format!("{}", ux4_instance);
+        assert!(formatted_string == test_string);
+    }
+
+    #[test]
+    fn print_lower_hex() {
+        let [a,b,c,d] = [0xABCD0123, 0xBCDE1234, 0xCDEF2345, 0xDEF83456];
+        let test_string = format!("{:x} {:x} {:x} {:x}", a, b, c, d);
+
+        let ux4_instance = Ux4::<u64>([a, b, c, d]);
+        let formatted_string = format!("{:x}", ux4_instance);
+        assert!(formatted_string == test_string);
+    }
+    
+    #[test]
+    fn print_upper_hex() {
+        let [a,b,c,d] = [0xABCD0123, 0xBCDE1234, 0xCDEF2345, 0xDEF83456];
+        let test_string = format!("{:X} {:X} {:X} {:X}", a, b, c, d);
+
+        let ux4_instance = Ux4::<u64>([a, b, c, d]);
+        let formatted_string = format!("{:X}", ux4_instance);
+        assert!(formatted_string == test_string);
+    }
+
+    #[test]
+    fn print_bin() {
+        let [a,b,c,d] = [0xABCD0123, 0xBCDE1234, 0xCDEF2345, 0xDEF83456];
+        let test_string = format!("{:b} {:b} {:b} {:b}", a, b, c, d);
+
+        let ux4_instance = Ux4::<u64>([a, b, c, d]);
+        let formatted_string = format!("{:b}", ux4_instance);
+        assert!(formatted_string == test_string);
+    }
 
     // #[test]
     // #[should_panic]
-    // fn invalid_bound_sigma_0() {
-    //     let _cauchy = Cauchy::new(0.0, 2.0, 3).unwrap();
+    // fn should_panic_function() {
+    //     assert!(1 == 0);
     // }
 }

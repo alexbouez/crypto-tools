@@ -4,26 +4,27 @@
 //!
 //! Module implementing the ARX hash functions SipHash and Half-SipHash.
 
-// use std::io::Error;
+use std::num::Wrapping;
 use std::ops::{BitOr, BitXor, Add, Sub, Shl, Shr};
 use crate::utilities::{ustates::Ux4, bitops::urot};
 
 /// General SipHash permutation for 4xU states.
 pub fn SipHash_general_permutation<U>(state: &mut Ux4<U>, params: [usize;5])
     where U: Copy + BitOr<Output = U> + BitXor<Output = U> + Sub<Output = U> + 
-        Add<Output = U> + Shl<usize, Output = U> + Shr<usize, Output = U> 
+        Add<Output = U> + Shl<usize, Output = U> + Shr<usize, Output = U> + 
+        std::fmt::UpperHex, Wrapping<U>: Add<Output = Wrapping<U>>
 {
     let [mut p0, mut p1, mut p2, mut p3] = state.get();
     let [a, b, c, d, e] = params;
 
-    p0 = p0 + p1;
+    p0 = (Wrapping(p0) + Wrapping(p1)).0;
     p1 = urot::<U>(p1, a) ^ p0;
     p0 = urot::<U>(p0, e);
-    p2 = p2 + p3;
+    p2 = (Wrapping(p2) + Wrapping(p3)).0;
     p3 = urot::<U>(p3, b) ^ p2;
-    p0 = p0 + p3;
+    p0 = (Wrapping(p0) + Wrapping(p3)).0;
     p3 = urot::<U>(p3, d) ^ p0;
-    p2 = p2 + p1;
+    p2 = (Wrapping(p2) + Wrapping(p1)).0;
     p1 = urot::<U>(p1, c) ^ p2;
     p2 = urot::<U>(p2, e);
 

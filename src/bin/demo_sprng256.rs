@@ -10,7 +10,7 @@
 use std::io::Error;
 use std::time::Instant;
 
-// use CryptoTools::prng::{PRNG, gt2016::SPRG};
+use CryptoTools::prng::{PRNG, gt2016::SPRG};
 use CryptoTools::{utilities::ustates::Ux4, hash::siphash::SipHash_perm};
 
 /// Main function. 
@@ -26,29 +26,35 @@ fn main() -> Result<(), Error>{
         ret
     }
 
+    // Define parameters 
+    let (n, r, t, s) = (256, 32, 1, 3);
+    let nb_inputs: usize = 8;
+    let nb_next: usize = 128;
+
     // Setup
-    // let mut sprg = SPRG::setup(vec!(256, 16, 2, 32), perm)?;
+    let mut sprg = SPRG::setup(vec!(n, r, t, s), perm)?;
 
-    // for i in 0..8 {
-    //     // Refresh
-    //     let mask = sprg.get_mask();
-    //     let mut rng = thread_rng();
-    //     let mut inputs: Vec<u64> = Vec::with_capacity(6_usize);
-    //     for _ in 0..6 {
-    //         inputs.push(rng.gen::<u64>() & mask);
-    //     }
-    //     sprg.refresh(inputs);
+    for i in 0..8 {
+        // Generate refresh inputs
+        let mask = sprg.get_mask();
+        let mut inputs: Vec<Ux4::<u64>> = Vec::with_capacity(nb_inputs);
+        for _ in 0..nb_inputs {
+            inputs.push(Ux4::<u64>::rand() & mask);
+        }
 
-    //     // Next
-    //     let mut R: u64;
-    //     print!("Output {}:\t0x",i);
-    //     for _ in 0..8 {
-    //         R = sprg.next();
-    //         print!("{:X}", R);
-    //     }
-    //     print!("\n");
-    // }
+        // Refresh
+        sprg.refresh(inputs);
 
-    println!("\n-> Total execution time: {:.2?}", execution_start.elapsed());
+        // Next
+        let mut R: Ux4::<u64>;
+        print!("Output {}: ",i);
+        for _ in 0..nb_next {
+            R = sprg.next();
+            print!("{:X}", R.0[0]);
+        }
+        println!("\n");
+    }
+
+    println!("-> Total execution time: {:.2?}", execution_start.elapsed());
     Ok(())
 }
