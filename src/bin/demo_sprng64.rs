@@ -26,6 +26,7 @@ fn main() -> Result<(), Error>{
     // Define parameters 
     let (n, r, t, s) = (64, 4, 1, 3);
     let nb_inputs: usize = 8;
+    let nb_next: usize = 24;
 
     // Setup
     let mut sprg = SPRG::setup(vec!(n, r, t, s), rot_17)?;
@@ -45,7 +46,7 @@ fn main() -> Result<(), Error>{
         // Next
         let mut R: u64;
         print!("Output {}:\t0x",i);
-        for _ in 0..24 {
+        for _ in 0..nb_next {
             R = sprg.next();
             print!("{:X}", R);
         }

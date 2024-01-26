@@ -4,6 +4,8 @@
 
 //! PRNG
 
+/// Module implementing various constructions.
+pub mod construction;
 /// Module implementing Hash functions.
 pub mod hash;
 /// Module implementing Pseudo Random Number Generators.

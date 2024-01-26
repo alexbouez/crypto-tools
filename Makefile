@@ -22,3 +22,7 @@ sprng64:
 	@ cargo run --bin demo_sprng64
 sprng256: 
 	@ cargo run --bin demo_sprng256
+duplex64: 
+	@ cargo run --bin demo_duplex64
+duplex256: 
+	@ cargo run --bin demo_duplex256
