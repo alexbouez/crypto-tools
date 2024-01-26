@@ -145,6 +145,29 @@ impl<U> Shl<usize> for Ux4<U>
     }
 }
 
+impl<U> Shr<usize> for Ux4<U> 
+    where U: From<u8> + Copy + Shr<usize, Output = U> + Shl<usize, Output = U> + 
+        PartialEq + PartialOrd + Add<Output = U> + BitAnd<Output = U> 
+{
+    type Output = Self;
+    fn shr(self, shift: usize) -> Self::Output {
+        let mut result = self;
+        let bits_per_unit = std::mem::size_of::<U>() * 8;
+
+        for _ in 0..shift {
+            let mut carry: U = 0_u8.into();  
+            for i in (0..4).rev() {
+                // Shift current element and add carry
+                let new_carry = result.0[i] & 1_u8.into();
+                result.0[i] = ((result.0[i]) >> 1) + (carry << (bits_per_unit - 1));
+                carry = new_carry;
+            }
+        }
+
+        result
+    }
+}
+
 impl<U> Add for Ux4<U> 
     where U: From<u8> + Copy + Add<Output = U> + PartialOrd, 
         Wrapping<U>: Add<Output = Wrapping<U>>
