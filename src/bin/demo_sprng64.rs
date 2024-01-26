@@ -1,6 +1,5 @@
 #![warn(missing_docs)]
 #![allow(non_snake_case)]
-#![feature(rustdoc_missing_doc_code_examples)]
 
 //! Crypto Tools - Demo SPRNG 64-bit
 //!

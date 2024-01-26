@@ -1,3 +1,4 @@
+#![warn(missing_docs)]
 #![allow(non_snake_case)]
 
 //! Crypto Tools - Utilities - U-States
