@@ -2,7 +2,7 @@
 
 //! Crypto Tools - PRNG - GT2016
 //!
-//! Module implementing the sponge-based PRNG of Gazi and Tessaro 2016.
+//! Module implementing the sponge-based PRNG of Gazi and Tessaro 2016 (https://eprint.iacr.org/2016/169.pdf).
 
 use std::io::Error;
 use rand::{Rng, thread_rng, distributions::Standard, prelude::Distribution};
@@ -11,10 +11,10 @@ use crate::prng::PRNG;
 
 #[derive(Clone, Debug)]
 /// Structure implementing GT2016.
+/// Note that the state of the sponge is reversed for easier use of the outputs. 
+/// The outer part is stored in the lower bits.
 pub struct SPRG<U>
 {
-    n: usize,         // size of the state
-    r: usize,         // size of the outer part (n=c+r)
     t: usize,         // number of permutation rounds in `next' 
     s: usize,         // length of the seed vector'
     j: usize,         // seed iterator
@@ -27,9 +27,9 @@ pub struct SPRG<U>
 impl<U> SPRG<U> 
     where Vec<U>: Clone, U: Clone
 {
-    /// Getter for the parameters (n,r,t,s).
+    /// Getter for the parameters (t,s).
     pub fn get_params(&self) -> Vec<usize> {
-        vec![self.n, self.r, self.t, self.s]
+        vec![self.t, self.s]
     }
 
     /// Getter for the seed.
@@ -51,7 +51,7 @@ impl<U> PRNG<U, Vec<U>, U> for SPRG<U>
     /// General setup function.
     fn setup(params: Vec<usize>, func: fn(U) -> U) -> Result<Self, Error> {
         let (n, r, t, s) = (params[0], params[1], params[2], params[3]);
-        assert!(r <= n);    // 0 < r <= n   
+        assert!((0_usize < r) && (r <= n));    // 0 < r <= n   
         
         // Generate the mask
         let mut mask: U = 1_u8.into();
@@ -67,11 +67,8 @@ impl<U> PRNG<U, Vec<U>, U> for SPRG<U>
         // Initial state is r '0' bits and c random bits (n=c+r)
         let mut state: U = 0_u8.into();
         state = state | (rng.gen::<U>() & !mask);
-        // println!("Init state: {:X}", state);
 
         Ok(SPRG{
-            n: n,
-            r: r,
             t: t,
             s: s,
             j: 1_usize,
@@ -91,7 +88,6 @@ impl<U> PRNG<U, Vec<U>, U> for SPRG<U>
             );
             self.j = (self.j + 1) % self.s;
         }
-        // println!("Refreshed state: {:X}", self.state)
     }
     
     /// General next function.
