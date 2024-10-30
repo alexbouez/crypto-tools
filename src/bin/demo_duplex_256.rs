@@ -4,8 +4,8 @@
 
 //! Crypto Tools - Demo Duplex 256-bit
 //!
-//! Demonstration for using the Duplex construction of Dobraunig and Mennink (2019),
-//! with inner state of 4x64 bits.
+//! Demonstration for using the Duplex construction of Dobraunig and Mennink [DM2019],
+//! with inner state of 64x4 bits.
 
 use std::io::Error;
 use std::time::Instant;
@@ -20,11 +20,7 @@ fn main() -> Result<(), Error>{
     println!("Duplex Demonstration\n");
 
     // Define permutation
-    fn perm(state: Ux4::<u64>) -> Ux4::<u64> {
-        let mut ret = state.clone();
-        SipHash_perm(&mut ret);         // Example using SipHash as permutation
-        ret
-    }
+    fn perm(state: Ux4::<u64>) -> Ux4::<u64> {SipHash_perm(&state)} // Example using the SipHash permutation [AB2012]
 
     // Define parameters
     let (b, r, k, u, alpha) = (256, 32, 32, 3, 17);
@@ -33,7 +29,7 @@ fn main() -> Result<(), Error>{
     let flag = true;
 
     // Setup
-    let mut duplex = Duplex::setup(vec!(b, r, k, u, alpha), perm)?;
+    let mut duplex = Duplex::new(vec!(b, r, k, u, alpha), perm)?;
 
     let mut delta = 0;
     for i in 0..nb_rounds {

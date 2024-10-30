@@ -1,16 +1,16 @@
 #![warn(missing_docs)]
 #![allow(non_snake_case)]
 
-//! Crypto Tools - Demo GT2016 64-bit
+//! Crypto Tools - Demo SPRNG 64-bit
 //!
-//! Demonstration for using the sponge-based PRNG of Gazi and Tessaro (2016),
+//! Demonstration for using the sponge-based PRNG of Gazi and Tessaro [GT2016],
 //! with inner state of 64 bits.
 
 use std::io::Error;
 use std::time::Instant;
 use rand::{Rng, thread_rng};
 
-use CryptoTools::prng::{PRNG, gt2016::SPRNG};
+use CryptoTools::prng::{PRNG, sprng::SPRNG};
 use CryptoTools::utilities::bitops::urot;
 
 /// Main function.
@@ -28,7 +28,7 @@ fn main() -> Result<(), Error>{
     let nb_next: usize = 24;            // number of calls to next per refresh
 
     // Setup
-    let mut sprng = SPRNG::setup(vec!(n, r, t, s), rot_17)?;
+    let mut sprng = SPRNG::new(vec!(n, r, t, s), rot_17)?;
 
     for i in 0..8 {
         // Generate refresh inputs

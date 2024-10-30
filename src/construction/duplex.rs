@@ -2,7 +2,7 @@
 
 //! Crypto Tools - Construction - Duplex
 //!
-//! Module implementing the Duplex construction of Dobraunig and Mennink 2019 (https://eprint.iacr.org/2019/225.pdf).
+//! Module implementing the Duplex construction of Dobraunig and Mennink [DM2019].
 
 use std::io::Error;
 use rand::{Rng, thread_rng, distributions::Standard, prelude::Distribution};
@@ -10,7 +10,7 @@ use std::{ops::{BitXor, BitAnd, BitOr, Not, Add, Sub, Shl, Shr}, convert::From};
 use crate::utilities::bitops::urot;
 
 #[derive(Clone, Debug)]
-/// Structure implementing DM2019.
+/// Structure implementing [DM2019].
 /// Note that the state is reversed for easier use of the outputs.
 /// The outer part is stored in the lower bits.
 pub struct Duplex<U>
@@ -47,7 +47,7 @@ impl<U> Duplex<U>
         Standard: Distribution<U>
 {
     /// Setup function, part of the init function.
-    pub fn setup(params: Vec<usize>, func: fn(U) -> U) -> Result<Self, Error> {
+    pub fn new(params: Vec<usize>, func: fn(U) -> U) -> Result<Self, Error> {
         let (b, r, k, u, alpha) = (params[0], params[1], params[2], params[3], params[4]);
         assert!((0_usize < r) && (r <= b));
         assert!((0_usize < k) && (k <= b));

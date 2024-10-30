@@ -4,7 +4,7 @@
 
 //! Crypto Tools - Demo Duplex 64-bit
 //!
-//! Demonstration for using the Duplex construction of Dobraunig and Mennink (2019),
+//! Demonstration for using the Duplex construction of Dobraunig and Mennink [DM2019],
 //! with inner state of 64 bits.
 
 use std::io::Error;
@@ -29,7 +29,7 @@ fn main() -> Result<(), Error>{
     let flag = true;
 
     // Setup
-    let mut duplex = Duplex::setup(vec!(b, r, k, u, alpha), perm)?;
+    let mut duplex = Duplex::new(vec!(b, r, k, u, alpha), perm)?;
 
     let mut delta = 0;
     for i in 0..nb_rounds {
