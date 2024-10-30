@@ -11,8 +11,8 @@ use crate::utilities::{ustates::Ux4, bitops::urot};
 
 /// General SipHash permutation for 4xU states.
 pub fn SipHash_general_permutation<U>(state: &mut Ux4<U>, params: [usize;5])
-    where U: Copy + BitOr<Output = U> + BitXor<Output = U> + Sub<Output = U> + 
-        Add<Output = U> + Shl<usize, Output = U> + Shr<usize, Output = U> + 
+    where U: Copy + BitOr<Output = U> + BitXor<Output = U> + Sub<Output = U> +
+        Add<Output = U> + Shl<usize, Output = U> + Shr<usize, Output = U> +
         std::fmt::UpperHex, Wrapping<U>: Add<Output = Wrapping<U>>
 {
     let [mut p0, mut p1, mut p2, mut p3] = state.get();

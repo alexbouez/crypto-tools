@@ -5,7 +5,7 @@
 //!
 //! This module groups various useful functions.
 
-/// Module implementing bitwise functions. 
+/// Module implementing bitwise functions.
 pub mod bitops;
-/// Module implementing multi-register states. 
+/// Module implementing multi-register states.
 pub mod ustates;

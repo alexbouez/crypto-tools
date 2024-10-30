@@ -4,5 +4,5 @@
 //!
 //! This module groups various constructions.
 
-/// Module implementing the Duplex construction of . 
+/// Module implementing the Duplex construction of .
 pub mod duplex;

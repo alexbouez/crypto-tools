@@ -13,7 +13,7 @@ use rand::{Rng, thread_rng};
 use CryptoTools::construction::duplex::Duplex;
 use CryptoTools::{utilities::ustates::Ux4, hash::siphash::SipHash_perm};
 
-/// Main function. 
+/// Main function.
 fn main() -> Result<(), Error>{
     println!("\n################\n# Crypto Tools #\n################\n");
     let execution_start = Instant::now();
@@ -26,19 +26,19 @@ fn main() -> Result<(), Error>{
         ret
     }
 
-    // Define parameters 
+    // Define parameters
     let (b, r, k, u, alpha) = (256, 32, 32, 3, 17);
     let nb_rounds: usize = 3;
-    let nb_calls: usize = 32;
+    let nb_calls: usize = 128;
     let flag = true;
 
     // Setup
-    let mut dplx = Duplex::setup(vec!(b, r, k, u, alpha), perm)?;
+    let mut duplex = Duplex::setup(vec!(b, r, k, u, alpha), perm)?;
 
     let mut delta = 0;
     for i in 0..nb_rounds {
         // Reset
-        dplx.reset(delta);
+        duplex.reset(delta);
 
         // Next
         let mut input: Ux4::<u64>;
@@ -47,7 +47,7 @@ fn main() -> Result<(), Error>{
         print!("Round {}: ", i);
         for _ in 0..nb_calls {
             input = rng.gen::<Ux4::<u64>>();
-            output = dplx.duplex(flag, input);
+            output = duplex.duplex(flag, input);
             print!("{:X}", output.0[0]);
         }
         println!("\n");

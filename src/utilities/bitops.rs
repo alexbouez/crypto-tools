@@ -9,7 +9,7 @@ use std::mem::size_of;
 use std::ops::{BitOr, Shl, Shr, Sub};
 
 /// Unsigned integer rotation function
-pub fn urot<U>(value: U, shift: usize) -> U 
+pub fn urot<U>(value: U, shift: usize) -> U
     where U: Copy + BitOr<Output = U> + Shl<usize, Output = U> +
         Shr<usize, Output = U> + Sub<Output = U> + Sized
 {

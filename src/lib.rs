@@ -1,7 +1,7 @@
 #![warn(missing_docs)]
 #![allow(non_snake_case)]
 
-//! PRNG
+//! Crypto Tools
 
 /// Module implementing various constructions.
 pub mod construction;

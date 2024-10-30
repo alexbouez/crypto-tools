@@ -1,7 +1,7 @@
 #![warn(missing_docs)]
 #![allow(non_snake_case)]
 
-//! Crypto Tools - PRNG - GT2016
+//! Crypto Tools - PRNG - GT 2016
 //!
 //! Module implementing the sponge-based PRNG of Gazi and Tessaro 2016 (https://eprint.iacr.org/2016/169.pdf).
 
@@ -11,12 +11,12 @@ use std::{ops::{BitXor, BitAnd, BitOr, Not, Sub, Shl}, convert::From};
 use crate::prng::PRNG;
 
 #[derive(Clone, Debug)]
-/// Structure implementing GT2016.
-/// Note that the state of the sponge is reversed for easier use of the outputs. 
+/// Structure implementing the Sponge PRNG GT2016.
+/// Note that the state of the sponge is reversed for easier use of the outputs.
 /// The outer part is stored in the lower bits.
-pub struct SPRG<U>
+pub struct SPRNG<U>
 {
-    t: usize,         // number of permutation rounds in `next' 
+    t: usize,         // number of permutation rounds in `next'
     s: usize,         // length of the seed vector'
     j: usize,         // seed iterator
     mask: U,
@@ -25,7 +25,7 @@ pub struct SPRG<U>
     state: U
 }
 
-impl<U> SPRG<U> 
+impl<U> SPRNG<U>
     where Vec<U>: Clone, U: Clone
 {
     /// Getter for the parameters (t,s).
@@ -44,16 +44,16 @@ impl<U> SPRG<U>
     }
 }
 
-impl<U> PRNG<U, Vec<U>, U> for SPRG<U>
-    where U: From<u8> + Not<Output = U> + BitAnd<Output = U> + BitXor<Output = U> + 
-        BitOr<Output = U> + Shl<usize, Output = U> + Sub<Output = U> + Copy + std::fmt::UpperHex, 
-        Standard: Distribution<U> 
+impl<U> PRNG<U, Vec<U>, U> for SPRNG<U>
+    where U: From<u8> + Not<Output = U> + BitAnd<Output = U> + BitXor<Output = U> +
+        BitOr<Output = U> + Shl<usize, Output = U> + Sub<Output = U> + Copy + std::fmt::UpperHex,
+        Standard: Distribution<U>
 {
     /// General setup function.
     fn setup(params: Vec<usize>, func: fn(U) -> U) -> Result<Self, Error> {
         let (n, r, t, s) = (params[0], params[1], params[2], params[3]);
-        assert!((0_usize < r) && (r <= n));    // 0 < r <= n   
-        
+        assert!((0_usize < r) && (r <= n));    // 0 < r <= n
+
         // Generate the mask
         let mut mask: U = 1_u8.into();
         mask = (mask << r) - 1_u8.into();
@@ -69,7 +69,7 @@ impl<U> PRNG<U, Vec<U>, U> for SPRG<U>
         let mut state: U = 0_u8.into();
         state = state | (rng.gen::<U>() & !mask);
 
-        Ok(SPRG{
+        Ok(SPRNG{
             t: t,
             s: s,
             j: 1_usize,
@@ -77,20 +77,20 @@ impl<U> PRNG<U, Vec<U>, U> for SPRG<U>
             perm: func,
             seed: seed,
             state: state
-        })  
+        })
     }
 
     /// General refresh function.
     fn refresh(&mut self, inputs: Vec<U>) {
         let l = inputs.len();
         for i in 1..l {
-            self.state = (self.perm)(self.state ^ 
+            self.state = (self.perm)(self.state ^
                 ((inputs[i-1] ^ self.seed[self.j]) & self.mask)
             );
             self.j = (self.j + 1) % self.s;
         }
     }
-    
+
     /// General next function.
     fn next(&mut self) -> U {
         self.state = (self.perm)(self.state);

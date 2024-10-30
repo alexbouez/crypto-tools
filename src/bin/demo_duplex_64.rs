@@ -13,7 +13,7 @@ use rand::{Rng, thread_rng};
 use CryptoTools::construction::duplex::Duplex;
 use CryptoTools::utilities::bitops::urot;
 
-/// Main function. 
+/// Main function.
 fn main() -> Result<(), Error>{
     println!("\n################\n# Crypto Tools #\n################\n");
     let execution_start = Instant::now();
@@ -22,19 +22,19 @@ fn main() -> Result<(), Error>{
     // Define permutation
     let perm: fn(u64) -> u64 = move |value| urot::<u64>(value, 8);
 
-    // Define parameters 
+    // Define parameters
     let (b, r, k, u, alpha) = (64, 4, 4, 3, 17);
     let nb_rounds: usize = 3;
     let nb_calls: usize = 1024;
     let flag = true;
 
     // Setup
-    let mut dplx = Duplex::setup(vec!(b, r, k, u, alpha), perm)?;
+    let mut duplex = Duplex::setup(vec!(b, r, k, u, alpha), perm)?;
 
     let mut delta = 0;
     for i in 0..nb_rounds {
         // Reset
-        dplx.reset(delta);
+        duplex.reset(delta);
 
         // Next
         let mut input: u64;
@@ -43,7 +43,7 @@ fn main() -> Result<(), Error>{
         print!("Round {}: ", i);
         for _ in 0..nb_calls {
             input = rng.gen::<u64>();
-            output = dplx.duplex(flag, input);
+            output = duplex.duplex(flag, input);
             print!("{:X}", output);
         }
         println!("\n");

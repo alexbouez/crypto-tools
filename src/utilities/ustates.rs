@@ -16,7 +16,7 @@ use rand::{Rng, thread_rng, distributions::Standard, prelude::Distribution};
 /// Structure for four-register states.
 pub struct Ux4<U>(pub [U; 4]);
 
-impl<U> Ux4<U> 
+impl<U> Ux4<U>
     where U: From<u8> + Copy
 {
     /// Return a new Ux4 with values `state`.
@@ -31,10 +31,10 @@ impl<U> Ux4<U>
 }
 
 /// [DEPRECATED]
-impl<U> Ux4<U> 
+impl<U> Ux4<U>
     where Standard: Distribution<U>
 {
-    /// Draw a random Ux4. 
+    /// Draw a random Ux4.
     pub fn rand() -> Self {
         let mut rng = thread_rng();
         Ux4([rng.gen::<U>(), rng.gen::<U>(), rng.gen::<U>(), rng.gen::<U>()])
@@ -57,7 +57,7 @@ impl<U> Ux4<U>
 
 // General Unsigned traits.
 
-impl<U> From<u8> for Ux4<U> 
+impl<U> From<u8> for Ux4<U>
     where U: From<u8> + Copy
 {
     fn from(item: u8) -> Self {
@@ -80,7 +80,7 @@ impl Distribution<Ux4<u64>> for Standard {
 
 // Unsigned operations.
 
-impl<U> Not for Ux4<U> 
+impl<U> Not for Ux4<U>
     where U: Not<Output = U> + Copy
 {
     type Output = Self;
@@ -89,12 +89,12 @@ impl<U> Not for Ux4<U>
     }
 }
 
-impl<U> BitAnd for Ux4<U> 
+impl<U> BitAnd for Ux4<U>
     where U: BitAnd<Output = U> + Copy
 {
     type Output = Self;
     fn bitand(self, rhs: Self) -> Self::Output {
-        Ux4([self.0[0] & rhs.0[0], self.0[1] & rhs.0[1], 
+        Ux4([self.0[0] & rhs.0[0], self.0[1] & rhs.0[1],
             self.0[2] & rhs.0[2], self.0[3] & rhs.0[3]])
     }
 }
@@ -104,7 +104,7 @@ impl<U> BitXor for Ux4<U>
 {
     type Output = Self;
     fn bitxor(self, rhs: Self) -> Self::Output {
-        Ux4([self.0[0] ^ rhs.0[0], self.0[1] ^ rhs.0[1], 
+        Ux4([self.0[0] ^ rhs.0[0], self.0[1] ^ rhs.0[1],
             self.0[2] ^ rhs.0[2], self.0[3] ^ rhs.0[3]])
     }
 }
@@ -114,25 +114,25 @@ impl<U> BitOr for Ux4<U>
 {
     type Output = Self;
     fn bitor(self, rhs: Self) -> Self::Output {
-        Ux4([self.0[0] | rhs.0[0], self.0[1] | rhs.0[1], 
+        Ux4([self.0[0] | rhs.0[0], self.0[1] | rhs.0[1],
             self.0[2] | rhs.0[2], self.0[3] | rhs.0[3]])
     }
 }
 
-impl<U> Shl<usize> for Ux4<U> 
-    where U: From<u8> + Copy + Shl<usize, Output = U> + Shr<usize, Output = U> + 
-        PartialEq + PartialOrd + Add<Output = U> + BitAnd<Output = U> 
+impl<U> Shl<usize> for Ux4<U>
+    where U: From<u8> + Copy + Shl<usize, Output = U> + Shr<usize, Output = U> +
+        PartialEq + PartialOrd + Add<Output = U> + BitAnd<Output = U>
 {
     type Output = Self;
     fn shl(self, shift: usize) -> Self::Output {
         let mut result = self;
         let bits_per_unit = std::mem::size_of::<U>() * 8;
-        
+
         // let mut mask: U = 1_u8.into();
         // mask = mask << (bits_per_unit - 2);
 
         for _ in 0..shift {
-            let mut carry: U = 0_u8.into();  
+            let mut carry: U = 0_u8.into();
             for i in 0..4 {
                 // Shift current element and add carry
                 let new_carry = result.0[i] >> (bits_per_unit - 1);
@@ -146,9 +146,9 @@ impl<U> Shl<usize> for Ux4<U>
     }
 }
 
-impl<U> Shr<usize> for Ux4<U> 
-    where U: From<u8> + Copy + Shr<usize, Output = U> + Shl<usize, Output = U> + 
-        PartialEq + PartialOrd + Add<Output = U> + BitAnd<Output = U> 
+impl<U> Shr<usize> for Ux4<U>
+    where U: From<u8> + Copy + Shr<usize, Output = U> + Shl<usize, Output = U> +
+        PartialEq + PartialOrd + Add<Output = U> + BitAnd<Output = U>
 {
     type Output = Self;
     fn shr(self, shift: usize) -> Self::Output {
@@ -156,7 +156,7 @@ impl<U> Shr<usize> for Ux4<U>
         let bits_per_unit = std::mem::size_of::<U>() * 8;
 
         for _ in 0..shift {
-            let mut carry: U = 0_u8.into();  
+            let mut carry: U = 0_u8.into();
             for i in (0..4).rev() {
                 // Shift current element and add carry
                 let new_carry = result.0[i] & 1_u8.into();
@@ -169,8 +169,8 @@ impl<U> Shr<usize> for Ux4<U>
     }
 }
 
-impl<U> Add for Ux4<U> 
-    where U: From<u8> + Copy + Add<Output = U> + PartialOrd, 
+impl<U> Add for Ux4<U>
+    where U: From<u8> + Copy + Add<Output = U> + PartialOrd,
         Wrapping<U>: Add<Output = Wrapping<U>>
 {
     type Output = Self;
@@ -192,20 +192,20 @@ impl<U> Add for Ux4<U>
     }
 }
 
-impl<U> Sub for Ux4<U> 
-    where U: From<u8> + Copy + Add<Output = U> + Not<Output = U> + PartialOrd, 
+impl<U> Sub for Ux4<U>
+    where U: From<u8> + Copy + Add<Output = U> + Not<Output = U> + PartialOrd,
         Wrapping<U>: Add<Output = Wrapping<U>>
 {
     type Output = Self;
 
     fn sub(self, rhs: Self) -> Self::Output {
-        let two_complement_rhs = (!rhs) + 
+        let two_complement_rhs = (!rhs) +
             Ux4([1u8.into(),0u8.into(),0u8.into(),0u8.into()]);
         self + two_complement_rhs
     }
 }
 
-impl<U> PartialEq for Ux4<U> 
+impl<U> PartialEq for Ux4<U>
     where U: PartialEq
 {
     fn eq(&self, other: &Self) -> bool {
@@ -215,7 +215,7 @@ impl<U> PartialEq for Ux4<U>
 
 // Print formats.
 
-impl<U> fmt::Display for Ux4<U> 
+impl<U> fmt::Display for Ux4<U>
 where
     U: fmt::Display + Copy
 {
@@ -227,7 +227,7 @@ where
     }
 }
 
-impl<U> fmt::LowerHex for Ux4<U> 
+impl<U> fmt::LowerHex for Ux4<U>
 where
     U: fmt::LowerHex + Copy
 {
@@ -240,7 +240,7 @@ where
     }
 }
 
-impl<U> fmt::UpperHex for Ux4<U> 
+impl<U> fmt::UpperHex for Ux4<U>
 where
     U: fmt::UpperHex + Copy
 {
@@ -253,7 +253,7 @@ where
     }
 }
 
-impl<U> fmt::Binary for Ux4<U> 
+impl<U> fmt::Binary for Ux4<U>
 where
     U: fmt::Binary + Copy
 {
@@ -301,7 +301,7 @@ pub mod test {
         assert!((c<<1) == d);
         assert!((e<<4) == f);
     }
-    
+
     #[test]
     fn shl_carry() {
         let a = Ux4::<u8>([255,0,0,0].into());
@@ -312,7 +312,7 @@ pub mod test {
 
         let e = Ux4::<u8>([255,255,255,255].into());
         let f = Ux4::<u8>([254,255,255,255].into());
-        
+
         let g = Ux4::<u8>([255,255,255,255].into());
         let h = Ux4::<u8>([0,255,255,255].into());
 
@@ -341,7 +341,7 @@ pub mod test {
         let formatted_string = format!("{:x}", ux4_instance);
         assert!(formatted_string == test_string);
     }
-    
+
     #[test]
     fn print_upper_hex() {
         let [a,b,c,d] = [0xABCD0123, 0xBCDE1234, 0xCDEF2345, 0xDEF83456];

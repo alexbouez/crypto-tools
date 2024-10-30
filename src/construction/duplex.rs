@@ -11,7 +11,7 @@ use crate::utilities::bitops::urot;
 
 #[derive(Clone, Debug)]
 /// Structure implementing DM2019.
-/// Note that the state is reversed for easier use of the outputs. 
+/// Note that the state is reversed for easier use of the outputs.
 /// The outer part is stored in the lower bits.
 pub struct Duplex<U>
 {
@@ -27,7 +27,7 @@ pub struct Duplex<U>
     state: U
 }
 
-impl<U> Duplex<U> 
+impl<U> Duplex<U>
     where Vec<U>: Clone, U: Clone
 {
     /// Getter for the parameters (b,r,k,u,a).
@@ -42,14 +42,14 @@ impl<U> Duplex<U>
 }
 
 impl<U> Duplex<U>
-    where U: Copy + From<u8> + Not<Output = U> + Shl<usize, Output = U> + Shr<usize, Output = U> 
-        + BitAnd<Output = U> + BitOr<Output = U> + BitXor<Output = U> + Add<Output = U> + Sub<Output = U>, 
-        Standard: Distribution<U> 
+    where U: Copy + From<u8> + Not<Output = U> + Shl<usize, Output = U> + Shr<usize, Output = U>
+        + BitAnd<Output = U> + BitOr<Output = U> + BitXor<Output = U> + Add<Output = U> + Sub<Output = U>,
+        Standard: Distribution<U>
 {
     /// Setup function, part of the init function.
     pub fn setup(params: Vec<usize>, func: fn(U) -> U) -> Result<Self, Error> {
         let (b, r, k, u, alpha) = (params[0], params[1], params[2], params[3], params[4]);
-        assert!((0_usize < r) && (r <= b)); 
+        assert!((0_usize < r) && (r <= b));
         assert!((0_usize < k) && (k <= b));
         assert!(0_usize < u);
 
@@ -68,9 +68,9 @@ impl<U> Duplex<U>
             keys.push(rng.gen::<U>() & kmask);
         }
 
-        // Initial state is r '0' 
+        // Initial state is r '0'
         let state: U = 0_u8.into();
-        
+
         Ok(Duplex{
             b: b,
             r: r,
@@ -85,17 +85,17 @@ impl<U> Duplex<U>
         })
     }
 
-    /// Reset function, part of the init function. 
-    /// Reset allows to reuse the same keys and parameters. 
+    /// Reset function, part of the init function.
+    /// Reset allows to reuse the same keys and parameters.
     pub fn reset(&mut self, delta: usize) {
         // Generate IV
         let mut rng = thread_rng();
         let initialization_vector = rng.gen::<U>() & !self.kmask;
-        
+
         self.state = urot::<U>(self.keys[delta % self.u] | initialization_vector, self.alpha);
         self.state = (self.perm)(self.state);
     }
-        
+
     /// General duplex function.
     pub fn duplex(&mut self, flag: bool, input: U) -> U {
         let output: U = self.state & self.mask;
