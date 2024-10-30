@@ -20,7 +20,7 @@ fn main() -> Result<(), Error>{
     println!("Duplex Demonstration\n");
 
     // Define permutation
-    let perm: fn(u64) -> u64 = move |value| urot::<u64>(value, 8);
+    let perm: fn(u64) -> u64 = move |value| urot::<u64>(value, 8);  // Example using a rotation as permutation
 
     // Define parameters
     let (b, r, k, u, alpha) = (64, 4, 4, 3, 17);

@@ -9,8 +9,17 @@ use std::num::Wrapping;
 use std::ops::{BitOr, BitXor, Add, Sub, Shl, Shr};
 use crate::utilities::{ustates::Ux4, bitops::urot};
 
-/// General SipHash permutation for 4xU states.
-pub fn SipHash_general_permutation<U>(state: &mut Ux4<U>, params: [usize;5])
+// #[derive(Clone, Debug)]
+// /// Structure implementing SipHash.
+// pub struct SipHash<U>
+// {
+//     n: usize,         // size of the state
+//     state: U,
+//     perm: fn(U) -> U,
+// }
+
+/// General SipHash permutation function for 4xU states.
+fn SipHash_general_permutation<U>(state: &mut Ux4<U>, params: [usize;5])
     where U: Copy + BitOr<Output = U> + BitXor<Output = U> + Sub<Output = U> +
         Add<Output = U> + Shl<usize, Output = U> + Shr<usize, Output = U> +
         std::fmt::UpperHex, Wrapping<U>: Add<Output = Wrapping<U>>
@@ -32,13 +41,13 @@ pub fn SipHash_general_permutation<U>(state: &mut Ux4<U>, params: [usize;5])
     state.set([p0, p1, p2, p3]);
 }
 
-/// SipHash permutation for 4x64 states.
+/// SipHash permutation function for 4x64 states.
 pub fn SipHash_perm(state: &mut Ux4::<u64>) {
     let params: [usize; 5] = [13, 16, 17, 21, 32];
     SipHash_general_permutation(state, params)
 }
 
-/// SipHash permutation for 4x32 states.
+/// SipHash permutation function for 4x32 states.
 pub fn Half_SipHash_perm(state: &mut Ux4::<u32>) {
     let params: [usize; 5] = [5, 8, 7, 13, 16];
     SipHash_general_permutation(state, params)

@@ -22,7 +22,7 @@ fn main() -> Result<(), Error>{
     // Define permutation
     fn perm(state: Ux4::<u64>) -> Ux4::<u64> {
         let mut ret = state.clone();
-        SipHash_perm(&mut ret);
+        SipHash_perm(&mut ret);         // Example using SipHash as permutation
         ret
     }
 

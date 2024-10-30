@@ -40,13 +40,13 @@ fn main() -> Result<(), Error>{
         }
 
         // Refresh
-        sprng.refresh(inputs);
+        sprng.refresh(inputs)?;
 
         // Next & Print
         let mut R: u64;
         print!("Output {}:\t0x",i);
         for _ in 0..nb_next {
-            R = sprng.next();
+            R = sprng.next()?;
             print!("{:X}", R);
         }
         println!("\n");

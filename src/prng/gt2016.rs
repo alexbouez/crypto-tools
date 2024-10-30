@@ -44,15 +44,23 @@ impl<U> SPRNG<U>
     }
 }
 
-impl<U> PRNG<U, Vec<U>, U> for SPRNG<U>
+impl<U> PRNG for SPRNG<U>
     where U: From<u8> + Not<Output = U> + BitAnd<Output = U> + BitXor<Output = U> +
         BitOr<Output = U> + Shl<usize, Output = U> + Sub<Output = U> + Copy + std::fmt::UpperHex,
         Standard: Distribution<U>
 {
+    // Here, the state, inputs and outputs are all of the same type U.
+    type State = U;
+    type Input = U;
+    type Output = U;
+
     /// General setup function.
-    fn setup(params: Vec<usize>, func: fn(U) -> U) -> Result<Self, Error> {
+    fn setup(params: Vec<usize>, func: fn(Self::State) -> Self::State) -> Result<Self, Error> {
+        assert!(params.len() == 4, "PRNG Setup: wrong number of parameters for setup. Expected 4, got {}", params.len());
         let (n, r, t, s) = (params[0], params[1], params[2], params[3]);
-        assert!((0_usize < r) && (r <= n));    // 0 < r <= n
+
+        assert!(r <= n, "PRNG Setup: rate r must be less than or equal to the state size n.");
+        assert!(s > 1, "PRNG Setup: seed size s must be greater than 1.");
 
         // Generate the mask
         let mut mask: U = 1_u8.into();
@@ -81,7 +89,7 @@ impl<U> PRNG<U, Vec<U>, U> for SPRNG<U>
     }
 
     /// General refresh function.
-    fn refresh(&mut self, inputs: Vec<U>) {
+    fn refresh(&mut self, inputs: Vec<U>) -> Result<(), Error> {
         let l = inputs.len();
         for i in 1..l {
             self.state = (self.perm)(self.state ^
@@ -89,10 +97,11 @@ impl<U> PRNG<U, Vec<U>, U> for SPRNG<U>
             );
             self.j = (self.j + 1) % self.s;
         }
+        Ok(())
     }
 
     /// General next function.
-    fn next(&mut self) -> U {
+    fn next(&mut self) -> Result<U, Error> {
         self.state = (self.perm)(self.state);
         let R = self.state & self.mask;
         for _ in 1..self.t {
@@ -100,6 +109,6 @@ impl<U> PRNG<U, Vec<U>, U> for SPRNG<U>
             self.state = self.state & !(self.mask);
         }
         self.j = 1_u8.into();
-        R
+        Ok(R)
     }
 }
