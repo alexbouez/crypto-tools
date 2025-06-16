@@ -10,7 +10,7 @@ use std::time::Instant;
 // use CryptoTools::utilities::ustates::Ux4;
 
 /// Main function of the crate.
-/// Contains sandbox area, allows access to all tools.
+/// Contains a sandbox area, which allows access to all the tools.
 fn main() -> Result<(), Error>{
     println!("\n################\n# Crypto Tools #\n################\n");
     let execution_start = Instant::now();

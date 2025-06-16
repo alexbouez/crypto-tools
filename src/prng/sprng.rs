@@ -14,6 +14,7 @@ use crate::prng::PRNG;
 
 // SPRNG structure.
 
+#[allow(dead_code)]
 #[derive(Getters, Clone, Debug)]
 /// Structure implementing the Sponge-based PRNG of Gazi and Tessaro [GT2016].
 /// Note that the state of the sponge is reversed for easier use of the outputs.

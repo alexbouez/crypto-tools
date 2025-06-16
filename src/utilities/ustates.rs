@@ -12,12 +12,13 @@ use std::cmp::{PartialOrd, PartialEq};
 use std::ops::{BitXor, BitOr, BitAnd, Not, Shl, Shr, Sub, Add};
 use rand::{Rng, thread_rng, distributions::Standard, prelude::Distribution};
 
-#[derive(Clone, Debug, Copy, Default)]
+#[derive(Copy, Clone, Debug, Default)]
 /// Structure for four-register states.
 pub struct Ux4<U>(pub [U; 4]);
 
 impl<U> Ux4<U>
-    where U: From<u8> + Copy
+where
+    U: From<u8> + Copy
 {
     /// Return a new Ux4 with values `state`.
     pub fn new(state: [U; 4]) -> Self {
@@ -32,7 +33,8 @@ impl<U> Ux4<U>
 
 /// [DEPRECATED]
 impl<U> Ux4<U>
-    where Standard: Distribution<U>
+where
+    Standard: Distribution<U>
 {
     /// Draw a random Ux4.
     pub fn rand() -> Self {
@@ -42,7 +44,8 @@ impl<U> Ux4<U>
 }
 
 impl<U> Ux4<U>
-    where U: Copy
+where
+    U: Copy
 {
     /// Getter for the state values.
     pub fn get(&self) -> [U; 4] {
@@ -58,7 +61,8 @@ impl<U> Ux4<U>
 // General Unsigned traits.
 
 impl<U> From<u8> for Ux4<U>
-    where U: From<u8> + Copy
+where
+    U: From<u8> + Copy
 {
     fn from(item: u8) -> Self {
         let mut state = Ux4::<U>::zero();
@@ -67,7 +71,8 @@ impl<U> From<u8> for Ux4<U>
     }
 }
 
-impl Distribution<Ux4<u64>> for Standard {
+impl Distribution<Ux4<u64>> for Standard
+{
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Ux4<u64> {
         Ux4([
             rng.gen::<u64>(),
@@ -81,18 +86,22 @@ impl Distribution<Ux4<u64>> for Standard {
 // Unsigned operations.
 
 impl<U> Not for Ux4<U>
-    where U: Not<Output = U> + Copy
+where
+    U: Not<Output = U> + Copy
 {
     type Output = Self;
+
     fn not(self) -> Self::Output {
         Ux4([!self.0[0], !self.0[1], !self.0[2], !self.0[3]])
     }
 }
 
 impl<U> BitAnd for Ux4<U>
-    where U: BitAnd<Output = U> + Copy
+where
+    U: BitAnd<Output = U> + Copy
 {
     type Output = Self;
+
     fn bitand(self, rhs: Self) -> Self::Output {
         Ux4([self.0[0] & rhs.0[0], self.0[1] & rhs.0[1],
             self.0[2] & rhs.0[2], self.0[3] & rhs.0[3]])
@@ -100,9 +109,11 @@ impl<U> BitAnd for Ux4<U>
 }
 
 impl<U> BitXor for Ux4<U>
-    where U: BitXor<Output = U> + Copy
+where
+    U: BitXor<Output = U> + Copy
 {
     type Output = Self;
+
     fn bitxor(self, rhs: Self) -> Self::Output {
         Ux4([self.0[0] ^ rhs.0[0], self.0[1] ^ rhs.0[1],
             self.0[2] ^ rhs.0[2], self.0[3] ^ rhs.0[3]])
@@ -110,9 +121,11 @@ impl<U> BitXor for Ux4<U>
 }
 
 impl<U> BitOr for Ux4<U>
-    where U: BitOr<Output = U> + Copy
+where
+    U: BitOr<Output = U> + Copy
 {
     type Output = Self;
+
     fn bitor(self, rhs: Self) -> Self::Output {
         Ux4([self.0[0] | rhs.0[0], self.0[1] | rhs.0[1],
             self.0[2] | rhs.0[2], self.0[3] | rhs.0[3]])
@@ -120,37 +133,35 @@ impl<U> BitOr for Ux4<U>
 }
 
 impl<U> Shl<usize> for Ux4<U>
-    where U: From<u8> + Copy + Shl<usize, Output = U> + Shr<usize, Output = U> +
-        PartialEq + PartialOrd + Add<Output = U> + BitAnd<Output = U>
+where
+    U: From<u8> + Copy + Shl<usize, Output = U> + Shr<usize, Output = U> + PartialEq + PartialOrd
+    + Add<Output = U> + BitAnd<Output = U>
 {
     type Output = Self;
+
     fn shl(self, shift: usize) -> Self::Output {
         let mut result = self;
         let bits_per_unit = std::mem::size_of::<U>() * 8;
 
-        // let mut mask: U = 1_u8.into();
-        // mask = mask << (bits_per_unit - 2);
-
         for _ in 0..shift {
             let mut carry: U = 0_u8.into();
             for i in 0..4 {
-                // Shift current element and add carry
                 let new_carry = result.0[i] >> (bits_per_unit - 1);
-                // result.0[i] = ((result.0[i] & mask) << 1) + carry;
                 result.0[i] = ((result.0[i]) << 1) + carry;
                 carry = new_carry;
             }
         }
-
         result
     }
 }
 
 impl<U> Shr<usize> for Ux4<U>
-    where U: From<u8> + Copy + Shr<usize, Output = U> + Shl<usize, Output = U> +
-        PartialEq + PartialOrd + Add<Output = U> + BitAnd<Output = U>
+where
+    U: From<u8> + Copy + Shr<usize, Output = U> + Shl<usize, Output = U> + PartialEq + PartialOrd
+    + Add<Output = U> + BitAnd<Output = U>
 {
     type Output = Self;
+
     fn shr(self, shift: usize) -> Self::Output {
         let mut result = self;
         let bits_per_unit = std::mem::size_of::<U>() * 8;
@@ -164,16 +175,17 @@ impl<U> Shr<usize> for Ux4<U>
                 carry = new_carry;
             }
         }
-
         result
     }
 }
 
 impl<U> Add for Ux4<U>
-    where U: From<u8> + Copy + Add<Output = U> + PartialOrd,
-        Wrapping<U>: Add<Output = Wrapping<U>>
+where
+    U: From<u8> + Copy + Add<Output = U> + PartialOrd,
+    Wrapping<U>: Add<Output = Wrapping<U>>
 {
     type Output = Self;
+
     fn add(self, rhs: Self) -> Self::Output {
         let mut result: [U; 4] = [0_u8.into(); 4];
         let mut carry: U = 0_u8.into();
@@ -187,14 +199,14 @@ impl<U> Add for Ux4<U>
                 0_u8.into()
             };
         }
-
         Ux4(result)
     }
 }
 
 impl<U> Sub for Ux4<U>
-    where U: From<u8> + Copy + Add<Output = U> + Not<Output = U> + PartialOrd,
-        Wrapping<U>: Add<Output = Wrapping<U>>
+where
+    U: From<u8> + Copy + Add<Output = U> + Not<Output = U> + PartialOrd,
+    Wrapping<U>: Add<Output = Wrapping<U>>
 {
     type Output = Self;
 
@@ -206,7 +218,8 @@ impl<U> Sub for Ux4<U>
 }
 
 impl<U> PartialEq for Ux4<U>
-    where U: PartialEq
+where
+    U: PartialEq
 {
     fn eq(&self, other: &Self) -> bool {
         self.0.iter().zip(other.0.iter()).all(|(a, b)| a == b)
@@ -361,10 +374,4 @@ pub mod test {
         let formatted_string = format!("{:b}", ux4_instance);
         assert!(formatted_string == test_string);
     }
-
-    // #[test]
-    // #[should_panic]
-    // fn should_panic_function() {
-    //     assert!(1 == 0);
-    // }
 }
