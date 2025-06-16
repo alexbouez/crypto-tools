@@ -1,9 +1,11 @@
 #![warn(missing_docs)]
 #![allow(non_snake_case)]
 
-//! Crypto Tools - Utilities - U-States
-//!
 //! Module implementing multi-register states.
+//!
+//! This module provides a structure `Ux4<U>` that represents a state consisting of four registers of type `U`.
+//! It supports various operations such as addition, subtraction, bitwise operations, and random generation.
+//! Compatible U types: `u8`, `u16`, `u32`, `u64`, `u128`.
 
 use std::fmt;
 use std::convert::From;
@@ -31,7 +33,7 @@ where
     }
 }
 
-/// [DEPRECATED]
+/// UNSAFE.
 impl<U> Ux4<U>
 where
     Standard: Distribution<U>

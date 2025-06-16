@@ -1,5 +1,7 @@
 #![allow(non_snake_case)]
 
-//! Crypto Tools - Other - Duplex
+//! Module implementing the Asakey construction.
 //!
-//! Module implementing the Duplex construction of Dobraunig and Mennink [DM2019].
+//! Module implementing the Asakey construction of [DMP2022](https://doi.org/10.1145/3548606.3560635).
+
+// TODO

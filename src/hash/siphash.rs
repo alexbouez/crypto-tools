@@ -1,10 +1,12 @@
 #![warn(missing_docs)]
 #![allow(non_snake_case)]
 
-//! Crypto Tools - Hash - SipHash
+//! Module implementing SipHash and Half-SipHash.
 //!
-//! Module implementing the ARX hash function SipHash [AB2012] and the Half-SipHash variant [LINUXv6.11],
-//! with public access to the SipHash and Half-SipHash permutation functions.
+//! Module implementing the ARX hash function SipHash from [AB2012](https://doi.org/10.1007/978-3-642-34931-7_28),
+//! the SipHash permutation for 64-bit states, and the Half-SipHash permutation variant for 32-bit states
+//! as found in [LINUXv6.11](https://elixir.bootlin.com/linux/v6.11.5/source/include/linux/siphash.h#L157).
+//! Both permutation implementations are public.
 
 use std::io::Error;
 use std::num::Wrapping;
@@ -18,7 +20,7 @@ use crate::hash::Digest;
 
 #[allow(dead_code)]
 #[derive(Getters, Clone, Debug)]
-/// Structure implementing SipHash [AB2012].
+/// Structure implementing [SipHash](https://doi.org/10.1007/978-3-642-34931-7_28)
 pub struct SipHash<U>
 where
     U: Clone
@@ -133,7 +135,7 @@ impl SipHash<u32>
 impl SipHash<u64>
 {
     /// Setup function for SipHash with u64x4 state.
-    /// The initial state is set using the constants from the SipHash paper [AB2012].
+    /// The initial state is set using the constants from [AB2012](https://doi.org/10.1007/978-3-642-34931-7_28).
     pub fn new(params: Vec<usize>) -> Result<Self, Error> {
         assert!(params.len() == 2, "SipHash Setup: wrong number of parameters. Expected 2, got {}.", params.len());
         let (c, d) = (params[0], params[1]);

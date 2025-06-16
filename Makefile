@@ -10,6 +10,9 @@ run:
 release:
 	@ cargo build --release --target=x86_64-unknown-linux-gnu
 
+doc:
+	@ cargo doc --no-deps --open
+
 clean:
 	@ cargo clean
 

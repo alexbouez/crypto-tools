@@ -1,8 +1,7 @@
 #![allow(non_snake_case)]
 
-//! Crytpo Tools - Other
+//! Module implementing various constructions.
 //!
-//! This module groups various constructions.
+//! This module groups various constructions that do not fit into the other categories.
 
-/// Module implementing the Duplex construction of Dobraunig and Mennink [DM2019].
 pub mod duplex;

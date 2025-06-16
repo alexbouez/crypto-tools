@@ -1,9 +1,8 @@
 #![allow(non_snake_case)]
 
-//! Crytpo Tools - Stream
+//! Module implementing Stream Ciphers.
 //!
-//! This module groups all Stream Ciphers.
+//! This module groups all stream cipher implementations.
 //! These are accessible through the Stream trait, which implements TODO.
 
-/// Module implementing the Asakey construction of Dobraunig, Mennink, and Primas [DMP2022].
 pub mod asakey;

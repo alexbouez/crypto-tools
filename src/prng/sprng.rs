@@ -1,9 +1,9 @@
 #![warn(missing_docs)]
 #![allow(non_snake_case)]
 
-//! Crypto Tools - PRNG - GT 2016
+//! Module implementing SPRNG (Sponge-based Pseudo Random Number Generator).
 //!
-//! Module implementing the sponge-based PRNG of Gazi and Tessaro [GT2016].
+//! Module implementing the sponge-based PRNG of [GT2016](https://doi.org/10.1007/978-3-662-49890-3_4).
 
 use std::io::Error;
 use getset::Getters;
@@ -16,14 +16,14 @@ use crate::prng::PRNG;
 
 #[allow(dead_code)]
 #[derive(Getters, Clone, Debug)]
-/// Structure implementing the Sponge-based PRNG of Gazi and Tessaro [GT2016].
+/// Structure implementing the Sponge-based PRNG of [GT2016](https://doi.org/10.1007/978-3-662-49890-3_4).
 /// Note that the state of the sponge is reversed for easier use of the outputs.
 /// The outer part is stored in the lower bits.
 pub struct SPRNG<U>
 where
     U: Clone
 {
-    /// Number of `next' calls.
+    /// Number of `next` calls.
     #[getset(get = "pub")]
     t: usize,
 
@@ -72,7 +72,7 @@ where
             seed_vec.push(rng.gen::<U>() & mask);
         }
 
-        // Initial state is r '0' bits and c random bits (n=c+r)
+        // Initial state is r `0` bits and c random bits (n=c+r)
         let mut state: U = 0_u8.into();
         state = state | (rng.gen::<U>() & !mask);
 

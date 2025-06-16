@@ -1,15 +1,16 @@
 #![warn(missing_docs)]
 #![allow(non_snake_case)]
 
-//! Crypto Tools - Hash
+//! Module implementing Hash functions.
 //!
-//! This module groups all Hash functions.
-//! These are accessible through the Hash trait, which implements the `hash' function.
+//! This module groups all Hash function implementations.
+//! These are accessible through the Hash trait, which implements the `hash` function.
+//! They also implement the trait `Digest`, which defines the general interface for Hash functions.
 
 use std::io::Error;
 
 /// Trait for Hash functions,
-/// with public general-purpose functions `update' and `finalize'.
+/// with public, general-purpose functions `update` and `finalize`.
 pub trait Digest
 {
     /// Type of the output of the Hash function.
@@ -25,6 +26,4 @@ pub trait Digest
     fn finalize(&mut self) -> Result<Self::Output, Error>;
 }
 
-/// Module implementing SipHash [AB2012].
-/// Public access to the SipHash permutation functions: SipHash_perm and Half_SipHash_perm.
 pub mod siphash;

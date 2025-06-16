@@ -1,10 +1,10 @@
 #![warn(missing_docs)]
 #![allow(non_snake_case)]
 
-//! Crypto Tools - Demo SPRNG 64-bit
+//! SPRNG demo with 64-bit state.
 //!
-//! Demonstration for using the sponge-based PRNG of Gazi and Tessaro [GT2016],
-//! with inner state of 64 bits.
+//! Demonstration for using the sponge-based PRNG of [GT2016](https://doi.org/10.1007/978-3-662-49890-3_4),
+//! with an inner state of 64 bits.
 
 use std::io::Error;
 use std::time::Instant;
@@ -13,7 +13,7 @@ use rand::{Rng, thread_rng};
 use CryptoTools::prng::{PRNG, sprng::SPRNG};
 use CryptoTools::utilities::bitops::urot;
 
-/// Main function.
+/// SPRNG demonstration with 64-bit state.
 fn main() -> Result<(), Error>{
     println!("\n################\n# Crypto Tools #\n################\n");
     let execution_start = Instant::now();

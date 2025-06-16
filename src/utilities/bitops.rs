@@ -1,9 +1,7 @@
 #![warn(missing_docs)]
 #![allow(non_snake_case)]
 
-//! Crypto Tools - Hash - BitOps
-//!
-//! Module implementing bitwise operations.
+//! Module implementing additional bitwise operations.
 
 use std::mem::size_of;
 use std::ops::{BitOr, Shl, Shr, Sub};

@@ -2,10 +2,10 @@
 #![allow(non_snake_case)]
 #![feature(rustdoc_missing_doc_code_examples)]
 
-//! Crypto Tools - Demo Duplex 256-bit
+//! Duplex demo with 256-bit state.
 //!
-//! Demonstration for using the Duplex construction of Dobraunig and Mennink [DM2019],
-//! with inner state of 64x4 bits.
+//! Demonstration for using the Duplex construction of [DM2019](https://doi.org/10.1007/978-3-030-34618-8_8),
+//! with an inner state of 64x4 bits.
 
 use std::io::Error;
 use std::time::Instant;
@@ -13,7 +13,7 @@ use rand::{Rng, thread_rng};
 use CryptoTools::other::duplex::Duplex;
 use CryptoTools::{utilities::ustates::Ux4, hash::siphash::SipHash_perm};
 
-/// Main function.
+/// Duplex demonstration with 256-bit state.
 fn main() -> Result<(), Error>{
     println!("\n################\n# Crypto Tools #\n################\n");
     let execution_start = Instant::now();

@@ -1,8 +1,8 @@
 #![allow(non_snake_case)]
 
-//! Crypto Tools - Other - Duplex
+//! Module implementing the Duplex construction.
 //!
-//! Module implementing the Duplex construction of Dobraunig and Mennink [DM2019].
+//! Module implementing the Duplex construction of [DM2019](https://doi.org/10.1007/978-3-030-34618-8_8).
 
 use std::io::Error;
 use getset::Getters;
@@ -14,7 +14,7 @@ use crate::utilities::bitops::urot;
 
 #[allow(dead_code)]
 #[derive(Getters, Clone, Debug)]
-/// Structure implementing [DM2019].
+/// Structure implementing [DM2019](https://doi.org/10.1007/978-3-030-34618-8_8).
 /// Note that the state is reversed for easier use of the outputs.
 /// The outer part is stored in the lower bits.
 pub struct Duplex<U>
