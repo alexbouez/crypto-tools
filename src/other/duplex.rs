@@ -1,6 +1,6 @@
 #![allow(non_snake_case)]
 
-//! Crypto Tools - Construction - Duplex
+//! Crypto Tools - Other - Duplex
 //!
 //! Module implementing the Duplex construction of Dobraunig and Mennink [DM2019].
 
@@ -42,15 +42,17 @@ impl<U> Duplex<U>
 }
 
 impl<U> Duplex<U>
-    where U: Copy + From<u8> + Not<Output = U> + Shl<usize, Output = U> + Shr<usize, Output = U>
-        + BitAnd<Output = U> + BitOr<Output = U> + BitXor<Output = U> + Add<Output = U> + Sub<Output = U>,
+    where U: Copy + From<u8> + Not<Output = U> + Shl<usize, Output = U>
+        + Shr<usize, Output = U> + Add<Output = U> + Sub<Output = U>
+        + BitAnd<Output = U> + BitOr<Output = U> + BitXor<Output = U>,
         Standard: Distribution<U>
 {
     /// Setup function, part of the init function.
     pub fn new(params: Vec<usize>, func: fn(U) -> U) -> Result<Self, Error> {
-        let (b, r, k, u, alpha) = (params[0], params[1], params[2], params[3], params[4]);
-        assert!((0_usize < r) && (r <= b));
-        assert!((0_usize < k) && (k <= b));
+        let (b, r, k) = (params[0], params[1], params[2]); // block size, rate, key size
+        assert!((0_usize < r) && (r <= b), "The rate r must be smaller than the block size b.");
+        assert!((0_usize < k) && (k <= b), "The key size k must be smaller than the block size b.");
+        let u = params[3];
         assert!(0_usize < u);
 
         // Generate the state mask
@@ -76,7 +78,7 @@ impl<U> Duplex<U>
             r: r,
             k: k,
             u: u,
-            alpha: alpha,
+            alpha: params[4],
             perm:  func,
             keys:  keys,
             kmask: kmask,
@@ -92,7 +94,9 @@ impl<U> Duplex<U>
         let mut rng = thread_rng();
         let initialization_vector = rng.gen::<U>() & !self.kmask;
 
-        self.state = urot::<U>(self.keys[delta % self.u] | initialization_vector, self.alpha);
+        self.state = urot::<U>(
+            self.keys[delta % self.u] | initialization_vector, self.alpha
+        );
         self.state = (self.perm)(self.state);
     }
 

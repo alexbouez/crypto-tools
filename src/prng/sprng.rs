@@ -6,32 +6,56 @@
 //! Module implementing the sponge-based PRNG of Gazi and Tessaro [GT2016].
 
 use std::io::Error;
+use getset::Getters;
 use rand::{Rng, thread_rng, distributions::Standard, prelude::Distribution};
 use std::{ops::{BitXor, BitAnd, BitOr, Not, Sub, Shl}, convert::From};
+
 use crate::prng::PRNG;
 
-#[derive(Clone, Debug)]
+// SPRNG structure.
+
+#[derive(Getters, Clone, Debug)]
 /// Structure implementing the Sponge-based PRNG of Gazi and Tessaro [GT2016].
 /// Note that the state of the sponge is reversed for easier use of the outputs.
 /// The outer part is stored in the lower bits.
 pub struct SPRNG<U>
+where
+    U: Clone
 {
-    t: usize,           // number of permutation rounds in `next'
-    s: usize,           // length of the seed vector'
-    j: usize,           // seed iterator
-    mask: U,            // mask used to extract the outer part
-    perm: fn(U) -> U,   // permutation function
-    seed: Vec<U>,       // seed vector
-    state: U            // state of the sponge
+    /// Number of `next' calls.
+    #[getset(get = "pub")]
+    t: usize,
+
+    /// Length of the seed.
+    #[getset(get = "pub")]
+    s: usize,
+
+    /// Seed iterator.
+    j: usize,
+
+    /// Outer part mask.
+    #[getset(get = "pub")]
+    mask: U,
+
+    /// Permutation function.
+    perm: fn(U) -> U,
+
+    /// Seed vector.
+    #[getset(get = "pub")]
+    seed: Vec<U>,
+
+    /// Inner state.
+    state: U
 }
 
 impl<U> SPRNG<U>
-    where U: Copy + Clone + From<u8> + Shl<usize, Output = U> + BitAnd<Output = U> +
-        Not<Output = U> + BitOr<Output = U> + Sub<Output = U>, Standard: Distribution<U>
+where
+    U: Copy + From<u8> + Shl<usize, Output = U> + BitAnd<Output = U> + Not<Output = U> + BitOr<Output = U>
+    + Sub<Output = U>, Standard: Distribution<U>
 {
     /// Setup function.
     pub fn new(params: Vec<usize>, func: fn(U) -> U) -> Result<Self, Error> {
-        assert!(params.len() == 4, "SPRNG Setup: wrong number of parameters for setup. Expected 4, got {}.", params.len());
+        assert!(params.len() == 4, "SPRNG Setup: wrong number of parameters. Expected 4, got {}.", params.len());
         let (n, r, t, s) = (params[0], params[1], params[2], params[3]);
         assert!(r <= n, "SPRNG Setup: rate r must be less than or equal to the state size n.");
         assert!(s > 1, "SPRNG Setup: seed size s must be greater than 1.");
@@ -51,7 +75,7 @@ impl<U> SPRNG<U>
         let mut state: U = 0_u8.into();
         state = state | (rng.gen::<U>() & !mask);
 
-        Ok(SPRNG{
+        Ok(Self{
             t: t,
             s: s,
             j: 1_usize,
@@ -61,27 +85,12 @@ impl<U> SPRNG<U>
             state: state
         })
     }
-
-    /// Getter for the parameters (t,s).
-    pub fn get_params(&self) -> Vec<usize> {
-        vec![self.t, self.s]
-    }
-
-    /// Getter for the seed.
-    pub fn get_seed(&self) -> Vec<U> {
-        self.seed.clone()
-    }
-
-    /// Getter for the mask.
-    pub fn get_mask(&self) -> U {
-        self.mask.clone()
-    }
 }
 
 impl<U> PRNG for SPRNG<U>
-    where U: Copy + From<u8> + Not<Output = U> + BitAnd<Output = U> + BitXor<Output = U>
+where
+    U: Copy + From<u8> + Not<Output = U> + BitAnd<Output = U> + BitXor<Output = U>
 {
-    // Here, the state, inputs and outputs are all of the same type U.
     type Input = U;
     type Output = U;
 

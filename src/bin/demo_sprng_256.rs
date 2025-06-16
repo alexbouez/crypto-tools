@@ -31,7 +31,7 @@ fn main() -> Result<(), Error>{
 
     for i in 0..8 {
         // Generate refresh inputs
-        let mask = sprng.get_mask();
+        let mask = *sprng.mask();
         let mut inputs: Vec<Ux4::<u64>> = Vec::with_capacity(nb_inputs);
         for _ in 0..nb_inputs {
             inputs.push(Ux4::<u64>::rand() & mask);

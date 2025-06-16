@@ -10,7 +10,7 @@
 use std::io::Error;
 use std::time::Instant;
 use rand::{Rng, thread_rng};
-use CryptoTools::construction::duplex::Duplex;
+use CryptoTools::other::duplex::Duplex;
 use CryptoTools::{utilities::ustates::Ux4, hash::siphash::SipHash_perm};
 
 /// Main function.

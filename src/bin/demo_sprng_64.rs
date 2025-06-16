@@ -32,7 +32,7 @@ fn main() -> Result<(), Error>{
 
     for i in 0..8 {
         // Generate refresh inputs
-        let mask = sprng.get_mask();
+        let mask = *sprng.mask();
         let mut rng = thread_rng();
         let mut inputs: Vec<u64> = Vec::with_capacity(nb_inputs);
         for _ in 0..nb_inputs {

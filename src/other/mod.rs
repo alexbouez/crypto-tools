@@ -1,6 +1,6 @@
 #![allow(non_snake_case)]
 
-//! Crytpo Tools - Construction
+//! Crytpo Tools - Other
 //!
 //! This module groups various constructions.
 

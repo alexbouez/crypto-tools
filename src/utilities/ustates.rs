@@ -12,7 +12,7 @@ use std::cmp::{PartialOrd, PartialEq};
 use std::ops::{BitXor, BitOr, BitAnd, Not, Shl, Shr, Sub, Add};
 use rand::{Rng, thread_rng, distributions::Standard, prelude::Distribution};
 
-#[derive(Clone, Debug, Copy)]
+#[derive(Clone, Debug, Copy, Default)]
 /// Structure for four-register states.
 pub struct Ux4<U>(pub [U; 4]);
 

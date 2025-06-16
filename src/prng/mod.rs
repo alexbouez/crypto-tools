@@ -9,12 +9,12 @@
 use std::io::Error;
 
 /// Trait for Pseudo Random Number Generators,
-/// with public general-purpose functions `refresh' and `next'.
+/// with public, general-purpose functions `refresh' and `next'.
 pub trait PRNG
 {
-    /// Type of the input to the PRNG.
+    /// PRNG input type.
     type Input;
-    /// Type of the output of the PRNG.
+    /// PRNG output type.
     type Output;
 
     /// General `refresh' function.
