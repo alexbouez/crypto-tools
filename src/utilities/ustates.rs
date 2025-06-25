@@ -3,7 +3,7 @@
 
 //! Module implementing multi-register states.
 //!
-//! This module provides a structure `Ux4<U>` that represents a state consisting of four registers of type `U`.
+//! Provides a structure `Ux4<U>` that represents a state consisting of four registers of type `U`.
 //! It supports various operations such as addition, subtraction, bitwise operations, and random generation.
 //! Compatible U types: `u8`, `u16`, `u32`, `u64`, `u128`.
 

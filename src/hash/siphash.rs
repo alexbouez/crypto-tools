@@ -3,7 +3,7 @@
 
 //! Module implementing SipHash and Half-SipHash.
 //!
-//! Module implementing the ARX hash function SipHash from [AB2012](https://doi.org/10.1007/978-3-642-34931-7_28),
+//! Implements the ARX hash function SipHash from [AB2012](https://doi.org/10.1007/978-3-642-34931-7_28),
 //! the SipHash permutation for 64-bit states, and the Half-SipHash permutation variant for 32-bit states
 //! as found in [LINUXv6.11](https://elixir.bootlin.com/linux/v6.11.5/source/include/linux/siphash.h#L157).
 //! Both permutation implementations are public.

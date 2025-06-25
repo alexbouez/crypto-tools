@@ -2,7 +2,7 @@
 
 //! Module implementing the Duplex construction.
 //!
-//! Module implementing the Duplex construction of [DM2019](https://doi.org/10.1007/978-3-030-34618-8_8).
+//! Based on the Duplex construction of [DM2019](https://doi.org/10.1007/978-3-030-34618-8_8).
 
 use std::io::Error;
 use getset::Getters;

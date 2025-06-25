@@ -2,7 +2,7 @@
 
 //! Module implementing the Asakey construction.
 //!
-//! Module implementing the Asakey construction of [DMP2022](https://doi.org/10.1145/3548606.3560635).
+//! Based on the Asakey construction of [DMP2022](https://doi.org/10.1145/3548606.3560635).
 
 use std::io::Error;
 use getset::Getters;
@@ -16,6 +16,7 @@ use crate::utilities::{ToLeBytes, bitops::bits_to_bytes};
 #[allow(dead_code)]
 #[derive(Getters, Clone, Debug)]
 /// Structure implementing [DMP2022](https://doi.org/10.1145/3548606.3560635).
+///
 /// Note that the state is reversed for easier use of the outputs.
 /// The outer part is stored in the lower bits.
 pub struct Asakey<U>

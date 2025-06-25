@@ -3,7 +3,7 @@
 
 //! Module implementing SPRNG (Sponge-based Pseudo Random Number Generator).
 //!
-//! Module implementing the sponge-based PRNG of [GT2016](https://doi.org/10.1007/978-3-662-49890-3_4).
+//! Based on the PRNG of [GT2016](https://doi.org/10.1007/978-3-662-49890-3_4).
 
 use std::io::Error;
 use getset::Getters;
