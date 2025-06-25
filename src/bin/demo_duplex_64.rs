@@ -17,7 +17,7 @@ use CryptoTools::utilities::bitops::urot;
 fn main() -> Result<(), Error>{
     println!("\n################\n# Crypto Tools #\n################\n");
     let execution_start = Instant::now();
-    println!("Duplex Demonstration\n");
+    println!("# Duplex Demonstration, 64-bit state\n");
 
     // Define permutation
     let perm: fn(u64) -> u64 = move |value| urot::<u64>(value, 8);  // Example using a rotation as permutation

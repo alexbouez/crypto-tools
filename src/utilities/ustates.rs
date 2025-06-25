@@ -14,8 +14,14 @@ use std::cmp::{PartialOrd, PartialEq};
 use std::ops::{BitXor, BitOr, BitAnd, Not, Shl, Shr, Sub, Add};
 use rand::{Rng, thread_rng, distributions::Standard, prelude::Distribution};
 
+use crate::utilities::ToLeBytes;
+
 #[derive(Copy, Clone, Debug, Default)]
 /// Structure for four-register states.
+///
+/// Note that this structure uses little-endian format,
+/// i.e. the first register is the least significant.
+/// When printing, it will display in little-endian order.
 pub struct Ux4<U>(pub [U; 4]);
 
 impl<U> Ux4<U>
@@ -61,6 +67,17 @@ where
 }
 
 // General Unsigned traits.
+
+impl<U> ToLeBytes for Ux4<U>
+where
+    U: Copy + ToLeBytes
+{
+    fn to_le_bytes(&self) -> Vec<u8> {
+        self.0.iter()
+            .flat_map(|x| x.to_le_bytes()) // works because T: unsigned integer
+            .collect()
+    }
+}
 
 impl<U> From<u8> for Ux4<U>
 where

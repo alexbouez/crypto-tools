@@ -17,7 +17,7 @@ use CryptoTools::{utilities::ustates::Ux4, hash::siphash::SipHash_perm};
 fn main() -> Result<(), Error>{
     println!("\n################\n# Crypto Tools #\n################\n");
     let execution_start = Instant::now();
-    println!("Duplex Demonstration\n");
+    println!("# Duplex Demonstration, 256-bit state\n");
 
     // Define permutation
     fn perm(state: Ux4::<u64>) -> Ux4::<u64> {SipHash_perm(&state)} // Example using the SipHash permutation [AB2012]

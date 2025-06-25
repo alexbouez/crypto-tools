@@ -66,10 +66,9 @@ where
     /// Setup function, part of the init phase.
     pub fn new(params: Vec<usize>, func: fn(U) -> U) -> Result<Self, Error> {
         let (b, r, k) = (params[0], params[1], params[2]); // block size, rate, key size
-        assert!((0_usize < r) && (r <= b), "The rate r must be smaller than the block size b.");
-        assert!((0_usize < k) && (k <= b), "The key size k must be smaller than the block size b.");
+        assert!(r <= b, "Invalid parameters: State size b must be greater than rate r.");
+        assert!(k <= b, "Invalid parameters: State size b must be greater than key size k.");
         let u = params[3];
-        assert!(0_usize < u);
 
         // Generate the state mask
         let mut mask: U = 1_u8.into();

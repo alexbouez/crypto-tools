@@ -17,7 +17,7 @@ use CryptoTools::utilities::bitops::urot;
 fn main() -> Result<(), Error>{
     println!("\n################\n# Crypto Tools #\n################\n");
     let execution_start = Instant::now();
-    println!("SPRNG Demonstration\n");
+    println!("# SPRNG Demonstration, 64-bit state\n");
 
     // Define permutation
     let rot_17: fn(u64) -> u64 = move |value| urot::<u64>(value, 17);   // Example using a rotation as permutation
