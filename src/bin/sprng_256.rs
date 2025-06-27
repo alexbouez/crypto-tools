@@ -19,7 +19,11 @@ fn main() -> Result<(), Error>{
     println!("# SPRNG Demonstration, 256-bit state\n");
 
     // Define permutation
-    fn perm(state: Ux4::<u64>) -> Ux4::<u64> {SipHash_perm(&state)} // Example using the SipHash permutation [AB2012]
+    fn perm(mut state: Ux4<u64>) -> Ux4<u64> {
+        const N_ROUNDS: usize = 4;
+        for _ in 0..N_ROUNDS {state = SipHash_perm(&state);}
+        state
+    } // Example using the SipHash permutation
 
     // Define parameters
     let (n, r, t, s) = (256, 32, 1, 3);     // input size, rate, number of truncations, size of seed

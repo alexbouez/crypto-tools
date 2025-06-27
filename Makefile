@@ -19,7 +19,7 @@ clean:
 distclean: clean
 	@ rm -rf out/ __pycache__/
 
-DEMO_BINS = demo_duplex_64 demo_duplex_256 demo_sprng_64 demo_sprng_256 demo_asakey_256
+DEMO_BINS = asakey_256 dss_256 duplex_64 duplex_256 sprng_64 sprng_256
 .PHONY: $(DEMO_BINS)
 
 bin_%:

@@ -1,8 +1,8 @@
 #![allow(non_snake_case)]
 
-//! Module implementing the Asakey construction.
+//! Module implementing the DSS construction.
 //!
-//! Based on the Asakey construction of [DMP2022](https://doi.org/10.1145/3548606.3560635).
+//! Based on [TODO].
 
 use std::io::Error;
 use getset::Getters;
@@ -11,15 +11,15 @@ use std::fmt::{LowerHex, Debug};
 
 use crate::utilities::{ToLeBytes, bitops::bits_to_bytes};
 
-// Asakey structure.
+// DSS structure.
 
 #[allow(dead_code)]
 #[derive(Getters, Clone, Debug)]
-/// Structure implementing [DMP2022](https://doi.org/10.1145/3548606.3560635).
+/// Structure implementing [TODO].
 ///
 /// Note that the state is reversed for easier use of the outputs.
 /// The outer part is stored in the lower bits.
-pub struct Asakey<U>
+pub struct DSS<U>
 where
     U: Clone,
 {
@@ -42,8 +42,11 @@ where
     /// Key mask.
     kmask: U,
 
-    /// Outer part mask.
+    /// Outer part (rate) mask.
     rmask:  U,
+
+    /// Domain mask.
+    dmask:  U,
 
     /// Permutation function.
     perm:  fn(U) -> U,
@@ -51,17 +54,20 @@ where
     /// Secret key.
     key: Option<U>,
 
-    /// Inner state.
-    state: Option<U>,
+    /// Inner state, top branch.
+    state_up: Option<U>,
+
+    /// Inner state, bottom branch.
+    state_down: Option<U>,
 }
 
-impl<U> Asakey<U>
+impl<U> DSS<U>
 where
     U: Copy + From<u8> + Not<Output = U> + Shl<usize, Output = U> + Shr<usize, Output = U> + Add<Output = U>
     + Sub<Output = U> + BitAnd<Output = U> + BitOr<Output = U> + BitXor<Output = U> + Shr<usize, Output = U>
     + LowerHex + Debug + ToLeBytes + PartialEq,
 {
-  /// Creates a new Asakey instance.
+  /// Creates a new DSS instance.
   pub fn new(params: Vec<usize>, perm: fn(U) -> U) -> Result<Self, Error> {
     let (b, r, k) = (params[0], params[1], params[2]);
     assert!(b > k, "Invalid parameters: State size b must be greater than key size k");
@@ -76,6 +82,10 @@ where
     let mut rmask: U = 1_u8.into();
     rmask = (rmask << r) - 1_u8.into();
 
+    //Create the domain mask (highest bit)
+    let mut dmask: U = 1_u8.into();
+    dmask = dmask << (b - 1);
+
     Ok(Self {
         b,
         r,
@@ -83,30 +93,33 @@ where
         k,
         kmask,
         rmask,
+        dmask,
         perm,
         key: None,
-        state: None,
+        state_up: None,
+        state_down: None,
     })
   }
 
-  /// Rekeys the Asakey instance.
+  /// Rekeys the DSS instance.
   ///
-  /// This function reinitializes the state of the Asakey instance using a new key.
+  /// This function reinitializes the state of the DSS instance using a new key.
   pub fn rekey(&mut self, key: U) -> Result<(), Error> {
     assert!(key != U::from(0_u8), "Key must be non-zero");
 
     self.key = Some(key);
-    self.state = None;
+    self.state_up = None;
+    self.state_down = None;
     Ok(())
   }
 
-  /// Initializes the Asakey state.
+  /// Initializes the DSS state.
   ///
-  /// This function initializes the state of the Asakey instance using a new nonce.
+  /// This function initializes the state of the DSS instance using a new nonce.
   pub fn init(&mut self, nonce: U) -> Result<(), Error> {
     assert!(nonce != U::from(0_u8), "Nonce must be non-zero");
     if self.key.is_none() {
-      return Err(Error::new(std::io::ErrorKind::Other, "Asakey key is not set"));
+      return Err(Error::new(std::io::ErrorKind::Other, "DSS key is not set"));
     }
 
     // Initialize the state with the key
@@ -122,36 +135,50 @@ where
 
     // Set the k first bits to the nonce
     state = (nonce & self.kmask) | (state & !self.rmask);
-    self.state = Some(state);
+    self.state_up = Some(state & !self.dmask); // domain bit is set to 0
+    self.state_down = Some(state | self.dmask); // domain bit is set to 1
 
     Ok(())
   }
 
-  /// Squeeze the Asakey state.
+  /// Squeeze the DSS state.
   ///
-  /// This function squeezes the Asakey instance to produce a stream block of size `r`.
+  /// This function squeezes the DSS instance to produce a stream block of size `r`.
   pub fn next(&mut self) -> Result<Vec<u8>, Error> {
-    if self.state.is_none() {
-      return Err(Error::new(std::io::ErrorKind::Other, "Asakey state is not initialized"));
+    if self.state_up.is_none() {
+      return Err(Error::new(std::io::ErrorKind::Other, "DSS state is not initialized"));
     }
 
-    // Permute the state
-    let state = (self.perm)(self.state.unwrap());
-    self.state = Some(state);
+    // Permute the states
+    let state_up = (self.perm)(self.state_up.unwrap());
+    let state_down = (self.perm)(self.state_down.unwrap());
 
+    // Extract the outer part (rate) from state_up (k_i)
+    let sub_key = state_up & self.rmask;
+
+    // Extract the outer part (rate) from state_down (S_i)
     let r_bits = (self.r + 7) / 8;
-    let outer_part = (state & self.rmask).to_le_bytes();
-    Ok(outer_part[..r_bits].into())
+    let output = state_down & self.rmask;
+
+    // Construct the new states
+    let mixed_c = (state_down & !self.rmask) ^ (state_up & !self.rmask);
+
+    let mixed_state = sub_key | mixed_c;
+    self.state_up = Some(mixed_state & !self.dmask); // domain bit is set to 0
+    self.state_down = Some(mixed_state | self.dmask); // domain bit is set to 1
+
+    // Output the first r bits of state_down
+    Ok(output.to_le_bytes()[..r_bits].into())
   }
 
   /// Collects `p` bytes of keystream bits.
   ///
-  /// This function collects `p` bytes of keystream bits from the Asakey instance,
+  /// This function collects `p` bytes of keystream bits from the DSS instance,
   /// assuming the state is initialized. The output is a vector of bytes.
   /// The superfluous bits are discarded.
   fn next_p_bytes(&mut self, p: usize) -> Result<Vec<u8>, Error> {
-    if self.state.is_none() {
-      return Err(Error::new(std::io::ErrorKind::Other, "Asakey state is not initialized"));
+    if self.state_up.is_none() {
+      return Err(Error::new(std::io::ErrorKind::Other, "DSS state is not initialized"));
     }
 
     let mut keystream_bits: Vec<u8> = Vec::new();
@@ -181,13 +208,13 @@ where
     Ok(bits_to_bytes(&keystream_bits))
   }
 
-  /// Encrypt a plaintext using the Asakey instance.
+  /// Encrypt a plaintext using the DSS instance.
   ///
-  /// This function encrypts the given plaintext using the Asakey instance.
+  /// This function encrypts the given plaintext using the DSS instance.
   /// It produces a ciphertext of the same length as the plaintext.
   pub fn encrypt(&mut self, key: U, nonce: U, input: impl AsRef<[u8]>) -> Result<Vec<u8>, Error>
   {
-    // Rekey and initialize the Asakey instance
+    // Rekey and initialize the DSS instance
     self.rekey(key)?;
     self.init(nonce)?;
 
